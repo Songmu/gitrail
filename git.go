@@ -10,13 +10,26 @@ import (
 	"strings"
 )
 
+func gitEnv() []string {
+	base := os.Environ()
+	env := make([]string, 0, len(base)+2)
+	env = append(env, "LANG=C", "LC_ALL=C")
+	for _, e := range base {
+		if strings.HasPrefix(e, "LANG=") || strings.HasPrefix(e, "LC_ALL=") {
+			continue
+		}
+		env = append(env, e)
+	}
+	return env
+}
+
 func gitCmd(ctx context.Context, dir string, errStream io.Writer, args ...string) (string, error) {
 	cmdArgs := args
 	if dir != "" {
 		cmdArgs = append([]string{"-C", dir}, args...)
 	}
 	cmd := exec.CommandContext(ctx, "git", cmdArgs...)
-	cmd.Env = append(os.Environ(), "LANG=C")
+	cmd.Env = gitEnv()
 	cmd.Stderr = errStream
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
@@ -32,7 +45,7 @@ func gitCmdAllowFail(ctx context.Context, dir string, errStream io.Writer, args 
 		cmdArgs = append([]string{"-C", dir}, args...)
 	}
 	cmd := exec.CommandContext(ctx, "git", cmdArgs...)
-	cmd.Env = append(os.Environ(), "LANG=C")
+	cmd.Env = gitEnv()
 	cmd.Stderr = errStream
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
