@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Songmu/gitmock"
 )
@@ -458,4 +459,44 @@ func TestTrailPathspec(t *testing.T) {
 	if !reflect.DeepEqual(result.Changes, want) {
 		t.Errorf("Changes = %v, want %v", result.Changes, want)
 	}
+}
+
+func TestGitrailTrailMethod(t *testing.T) {
+	gm := newTestRepo(t)
+	ctx := context.Background()
+
+	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+		"foo.go": "package main\n\nfunc foo() {}\n",
+	})
+	testCommit(t, gm, "2026-02-10T00:00:00Z", "modify", map[string]string{
+		"foo.go": "package main\n\nfunc foo() { /* modified */ }\n",
+	})
+
+	g := &Gitrail{Dir: gm.RepoPath(), ErrStream: os.Stderr}
+	since := time.Date(2026, 1, 15, 0, 0, 0, 0, time.UTC)
+	until := time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)
+
+	result, err := g.Trail(ctx, "", since, until)
+	if err != nil {
+		t.Fatalf("Trail: %v", err)
+	}
+
+	want := []FileChange{
+		{Status: Modified, Path: "foo.go"},
+	}
+	if !reflect.DeepEqual(result.Changes, want) {
+		t.Errorf("Changes = %v, want %v", result.Changes, want)
+	}
+}
+
+func TestGitrailTrailMethodNilReceiver(t *testing.T) {
+	// A nil *Gitrail should not panic; it will fail because there's no valid Dir.
+	// We just check it returns an error gracefully rather than panicking.
+	ctx := context.Background()
+	var g *Gitrail
+	since := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	until := time.Date(2026, 12, 31, 0, 0, 0, 0, time.UTC)
+	// Should not panic; will error (no git repo in current directory or empty)
+	// We just want to confirm no nil pointer dereference.
+	_, _ = g.Trail(ctx, "", since, until)
 }

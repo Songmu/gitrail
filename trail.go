@@ -28,31 +28,41 @@ type FileChange struct {
 	OldPath string // rename source path (only set when renamed)
 }
 
-// Option is the configuration for the Trail function.
-type Option struct {
-	Dir       string   // repo path, defaults to current directory
-	Since     time.Time // start time
-	Until     time.Time // end time
-	Branch    string   // target branch, defaults to HEAD
-	Pathspecs []string // optional path filters
-}
-
-// Result is the output from the Trail function.
+// Result is the output from the Trail method.
 type Result struct {
 	StartCommit string
 	EndCommit   string
 	Changes     []FileChange
 }
 
-// Trail is the main library entry point for tracking file changes over a time period.
-func Trail(ctx context.Context, opt *Option, errStream io.Writer) (*Result, error) {
+// Gitrail tracks file changes over a given time period in a Git repository.
+type Gitrail struct {
+	Dir       string    // repo path, defaults to current directory
+	ErrStream io.Writer // where git error output is written; defaults to io.Discard
+}
+
+func (g *Gitrail) errStream() io.Writer {
+	if g != nil && g.ErrStream != nil {
+		return g.ErrStream
+	}
+	return io.Discard
+}
+
+// Trail returns file changes between since and until on the given branch.
+// pathspecs optionally restricts which paths are considered.
+// An empty branch defaults to HEAD.
+func (g *Gitrail) Trail(ctx context.Context, branch string, since, until time.Time, pathspecs ...string) (*Result, error) {
+	dir := ""
+	if g != nil {
+		dir = g.Dir
+	}
 	return trail(ctx, &trailOpts{
-		Dir:       opt.Dir,
-		Since:     opt.Since.Format(time.RFC3339),
-		Until:     opt.Until.Format(time.RFC3339),
-		Branch:    opt.Branch,
-		Pathspecs: opt.Pathspecs,
-	}, errStream)
+		Dir:       dir,
+		Since:     since.Format(time.RFC3339),
+		Until:     until.Format(time.RFC3339),
+		Branch:    branch,
+		Pathspecs: pathspecs,
+	}, g.errStream())
 }
 
 type trailOpts struct {
