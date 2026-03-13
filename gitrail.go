@@ -30,12 +30,10 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		return printVersion(outStream)
 	}
 	if *since == "" {
-		fmt.Fprintln(errStream, "error: --since is required")
 		fs.Usage()
 		return newExitError(1, "--since is required")
 	}
 	if *until == "" {
-		fmt.Fprintln(errStream, "error: --until is required")
 		fs.Usage()
 		return newExitError(1, "--until is required")
 	}
