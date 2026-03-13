@@ -251,7 +251,8 @@ func parseRenameEvents(output string) [][]renameEvent {
 }
 
 func isCommitHash(s string) bool {
-	if len(s) != 40 {
+	// Accept SHA-1 (40 chars) or SHA-256 (64 chars) commit hashes.
+	if len(s) != 40 && len(s) != 64 {
 		return false
 	}
 	for _, c := range s {
