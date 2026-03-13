@@ -238,7 +238,7 @@ func parseRenameEvents(output string) [][]renameEvent {
 		if line == "" {
 			continue
 		}
-		// Check if line looks like a commit hash (40-char hex).
+		// Check if line looks like a commit hash (40- or 64-char hex).
 		if isCommitHash(line) {
 			if inCommit && len(current) > 0 {
 				commits = append(commits, current)
