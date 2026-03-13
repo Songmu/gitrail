@@ -46,7 +46,10 @@ func testCommit(t *testing.T, gm *gitmock.GitMock, date, msg string, files map[s
 	if _, _, err := gm.Commit("--date="+date, "-m", msg); err != nil {
 		t.Fatalf("git commit: %v", err)
 	}
-	out, _, _ := gm.Do("rev-parse", "HEAD")
+	out, _, err := gm.Do("rev-parse", "HEAD")
+	if err != nil {
+		t.Fatalf("git rev-parse HEAD: %v", err)
+	}
 	return strings.TrimSpace(out)
 }
 
@@ -60,7 +63,10 @@ func testRenameCommit(t *testing.T, gm *gitmock.GitMock, date, oldPath, newPath,
 	if _, _, err := gm.Commit("--date="+date, "-m", msg); err != nil {
 		t.Fatalf("git commit: %v", err)
 	}
-	out, _, _ := gm.Do("rev-parse", "HEAD")
+	out, _, err := gm.Do("rev-parse", "HEAD")
+	if err != nil {
+		t.Fatalf("git rev-parse HEAD: %v", err)
+	}
 	return strings.TrimSpace(out)
 }
 
@@ -74,7 +80,10 @@ func testDeleteCommit(t *testing.T, gm *gitmock.GitMock, date, path, msg string)
 	if _, _, err := gm.Commit("--date="+date, "-m", msg); err != nil {
 		t.Fatalf("git commit: %v", err)
 	}
-	out, _, _ := gm.Do("rev-parse", "HEAD")
+	out, _, err := gm.Do("rev-parse", "HEAD")
+	if err != nil {
+		t.Fatalf("git rev-parse HEAD: %v", err)
+	}
 	return strings.TrimSpace(out)
 }
 
