@@ -500,12 +500,28 @@ func TestGitrailTrailMethod(t *testing.T) {
 
 func TestGitrailTrailMethodNilReceiver(t *testing.T) {
 	// A nil *Gitrail should not panic; it will fail because there's no valid Dir.
-	// We just check it returns an error gracefully rather than panicking.
+	// We check it returns an error gracefully rather than panicking.
 	ctx := context.Background()
 	var g *Gitrail
 	since := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	until := time.Date(2026, 12, 31, 0, 0, 0, 0, time.UTC)
-	// Should not panic; will error (no git repo in current directory or empty)
-	// We just want to confirm no nil pointer dereference.
-	_, _ = g.Trail(ctx, "", since, until)
+
+	// Run in an empty temporary directory so we don't depend on or slow down the
+	// real current working directory (which might be a large git repository).
+	origWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd: %v", err)
+	}
+	tmpDir := t.TempDir()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Chdir to temp dir: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = os.Chdir(origWD)
+	})
+
+	// Should not panic; expect an error because there is no valid git repo / Dir.
+	if _, err := g.Trail(ctx, "", since, until); err == nil {
+		t.Fatalf("Trail with nil receiver and empty temp dir: expected error, got nil")
+	}
 }
