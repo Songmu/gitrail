@@ -167,7 +167,7 @@ func findEndCommit(ctx context.Context, dir, until, branch string, errStream io.
 func validateAncestor(ctx context.Context, dir, startCommit, endCommit string, errStream io.Writer) error {
 	_, exitCode, err := gitCmdAllowFail(ctx, dir, errStream, "merge-base", "--is-ancestor", startCommit, endCommit)
 	if err != nil {
-		return exitErrorf(1, "failed to check ancestry: %v", err)
+		return exitErrorf(1, "failed to check ancestry: %w", err)
 	}
 	if exitCode != 0 {
 		return newExitError(1, "start commit is not an ancestor of end commit (commits may be in reversed order)")
