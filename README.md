@@ -90,6 +90,9 @@ See [pkg.go.dev](https://pkg.go.dev/github.com/Songmu/gitrail) for full API docu
 ## Installation
 
 ```console
+# Install with Homebrew (macOS/Linux)
+% brew install Songmu/tap/gitrail
+
 # Install the latest version. (Install it into ./bin/ by default).
 % curl -sfL https://raw.githubusercontent.com/Songmu/gitrail/main/install.sh | sh -s
 
