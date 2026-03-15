@@ -11,15 +11,69 @@ gitrail
 [license]: https://github.com/Songmu/gitrail/blob/main/LICENSE
 [PkgGoDev]: https://pkg.go.dev/github.com/Songmu/gitrail
 
-gitrail short description
+gitrail tracks file changes over a given time period in a Git repository. It wraps git commands to show which files were added, modified, deleted, or renamed between two points in time, with rename chain detection.
 
-## Synopsis
+## CLI Usage
 
-```go
-// simple usage here
+```console
+% gitrail --since="2026-01-01" --until="2026-03-01"
+abc123..def456
+
+A	src/new.go
+D	src/removed.go
+M	src/bar.go	src/old_bar.go
+M	src/foo.go
 ```
 
-## Description
+### Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--since` | **required** | Start time |
+| `--until` | **required** | End time |
+| `-C` | current directory | Path to git repository |
+| `--branch` | HEAD | Target branch or revision |
+| `--json` | false | NDJSON output |
+| `-- pathspec...` | none | Git pathspec filters (e.g. `'*.go'`, `':!vendor/'`) |
+
+Time formats are passed directly to git — ISO 8601 (`2026-01-01`), relative dates (`"1 month ago"`), etc. are all supported.
+
+### NDJSON Output
+
+With `--json`, each line is a self-contained JSON object:
+
+```console
+% gitrail --since="2026-01-01" --until="2026-03-01" --json
+{"to":"def456","status":"Added","path":"src/new.go"}
+{"from":"abc123","to":"def456","status":"Modified","path":"src/foo.go"}
+{"from":"abc123","to":"def456","status":"Modified","path":"src/bar.go","old_path":"src/old_bar.go"}
+{"from":"abc123","status":"Deleted","path":"src/removed.go"}
+```
+
+The JSON schema is available at [`schema/output.schema.json`](schema/output.schema.json).
+
+### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success (with or without changes) |
+| 1 | Error (not a repo, reversed commits, start commit not found, etc.) |
+| 2 | End commit not found (out of history range) |
+
+## Library Usage
+
+```go
+g := gitrail.New("/path/to/repo")
+result, err := g.Trail(ctx, "main",
+    time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+    time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC),
+)
+for _, c := range result.Changes {
+    fmt.Printf("%s\t%s\n", c.Status, c.Path)
+}
+```
+
+See [pkg.go.dev](https://pkg.go.dev/github.com/Songmu/gitrail) for full API documentation.
 
 ## Installation
 

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Songmu/gitrail/raw/main/schema/output.schema.json",
+  "title": "gitrail NDJSON output",
+  "description": "Schema for each line of gitrail --json output. One JSON object per changed file.",
+  "type": "object",
+  "required": ["status", "path"],
+  "properties": {
+    "from": {
+      "type": "string",
+      "description": "Start commit hash. Present for Modified and Deleted entries."
+    },
+    "to": {
+      "type": "string",
+      "description": "End commit hash. Present for Added and Modified entries."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["Added", "Modified", "Deleted"],
+      "description": "Type of file change."
+    },
+    "path": {
+      "type": "string",
+      "description": "File path at the end commit. For Deleted entries, the path at the start commit."
+    },
+    "old_path": {
+      "type": "string",
+      "description": "Original file path before rename. Only present when the file was renamed."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "Added" } } },
+      "then": {
+        "required": ["to"],
+        "properties": { "from": false }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "Modified" } } },
+      "then": {
+        "required": ["from", "to"]
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "Deleted" } } },
+      "then": {
+        "required": ["from"],
+        "properties": { "to": false }
+      }
+    }
+  ],
+  "additionalProperties": false
+}
