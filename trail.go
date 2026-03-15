@@ -175,8 +175,11 @@ func validateAncestor(ctx context.Context, dir, startCommit, endCommit string, e
 	if err != nil {
 		return fmt.Errorf("failed to check ancestry: %w", err)
 	}
-	if exitCode != 0 {
+	if exitCode == 1 {
 		return fmt.Errorf("start commit is not an ancestor of end commit (commits may be in reversed order)")
+	}
+	if exitCode != 0 {
+		return newExitError(exitCode, fmt.Sprintf("git merge-base --is-ancestor failed with exit code %d", exitCode))
 	}
 	return nil
 }
