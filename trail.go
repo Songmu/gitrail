@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -38,14 +39,19 @@ type Result struct {
 // Gitrail tracks file changes over a given time period in a Git repository.
 type Gitrail struct {
 	Dir       string    // repo path, defaults to current directory
-	ErrStream io.Writer // where git error output is written; defaults to io.Discard
+	ErrStream io.Writer // where git error output is written; defaults to os.Stderr
+}
+
+// New creates a new Gitrail with the given repository directory.
+func New(dir string) *Gitrail {
+	return &Gitrail{Dir: dir}
 }
 
 func (g *Gitrail) errStream() io.Writer {
 	if g != nil && g.ErrStream != nil {
 		return g.ErrStream
 	}
-	return io.Discard
+	return os.Stderr
 }
 
 // Trail returns file changes between since and until on the given branch.
