@@ -12,7 +12,7 @@ import (
 	"github.com/Songmu/skillsmith"
 )
 
-//go:embed skills/**
+//go:embed skills
 var skillsFS embed.FS
 
 const cmdName = "gitrail"
