@@ -89,9 +89,9 @@ func testDeleteCommit(t *testing.T, gm *gitmock.GitMock, date, path, msg string)
 
 func TestParseNameStatus(t *testing.T) {
 	tests := []struct {
-		name   string
-		input  string
-		want   []FileChange
+		name  string
+		input string
+		want  []FileChange
 	}{
 		{
 			name:  "empty",
@@ -129,7 +129,7 @@ func TestParseNameStatus(t *testing.T) {
 			want:  []FileChange{{Status: Modified, Path: "src/link.go"}},
 		},
 		{
-			name: "multiple",
+			name:  "multiple",
 			input: "A\tnew.go\nM\texisting.go\nD\told.go",
 			want: []FileChange{
 				{Status: Added, Path: "new.go"},
@@ -151,9 +151,9 @@ func TestParseNameStatus(t *testing.T) {
 
 func TestParseRenameEvents(t *testing.T) {
 	tests := []struct {
-		name   string
-		input  string
-		want   [][]renameEvent
+		name  string
+		input string
+		want  [][]renameEvent
 	}{
 		{
 			name:  "empty",
@@ -161,14 +161,14 @@ func TestParseRenameEvents(t *testing.T) {
 			want:  nil,
 		},
 		{
-			name: "single_commit_single_rename",
+			name:  "single_commit_single_rename",
 			input: "abcdef1234567890abcdef1234567890abcdef12\nR100\told.go\tnew.go",
 			want: [][]renameEvent{
 				{{old: "old.go", new: "new.go"}},
 			},
 		},
 		{
-			name: "two_commits",
+			name:  "two_commits",
 			input: "abcdef1234567890abcdef1234567890abcdef12\nR100\tb.go\tc.go\nfedcba9876543210fedcba9876543210fedcba98\nR95\ta.go\tb.go",
 			want: [][]renameEvent{
 				{{old: "b.go", new: "c.go"}},
@@ -241,8 +241,8 @@ func TestTrailSameCommit(t *testing.T) {
 		t.Fatalf("trail: %v", err)
 	}
 
-	if result.StartCommit != result.EndCommit {
-		t.Errorf("expected StartCommit == EndCommit, got %s vs %s", result.StartCommit, result.EndCommit)
+	if result.From != result.To {
+		t.Errorf("expected From == To, got %s vs %s", result.From, result.To)
 	}
 	if len(result.Changes) != 0 {
 		t.Errorf("expected no changes, got %v", result.Changes)
@@ -270,11 +270,11 @@ func TestTrailStartCommitFallback(t *testing.T) {
 
 	// fallback start commit = first commit after since = h
 	// end commit also = h (--before=2026-03-01 finds h)
-	if result.StartCommit != h {
-		t.Errorf("StartCommit = %s, want %s", result.StartCommit, h)
+	if result.From != h {
+		t.Errorf("From = %s, want %s", result.From, h)
 	}
-	if result.StartCommit != result.EndCommit {
-		t.Errorf("expected same commit, got %s vs %s", result.StartCommit, result.EndCommit)
+	if result.From != result.To {
+		t.Errorf("expected same commit, got %s vs %s", result.From, result.To)
 	}
 	if len(result.Changes) != 0 {
 		t.Errorf("expected no changes for same commit, got %v", result.Changes)

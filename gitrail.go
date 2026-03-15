@@ -61,7 +61,7 @@ func printVersion(out io.Writer) error {
 }
 
 func outputText(out io.Writer, result *Result) error {
-	_, err := fmt.Fprintf(out, "%s..%s\n", result.StartCommit, result.EndCommit)
+	_, err := fmt.Fprintf(out, "%s..%s\n", result.From, result.To)
 	if err != nil {
 		return err
 	}
@@ -93,11 +93,11 @@ func outputText(out io.Writer, result *Result) error {
 }
 
 type jsonFileChange struct {
-	StartCommit string `json:"start_commit,omitempty"`
-	EndCommit   string `json:"end_commit,omitempty"`
-	Status      string `json:"status"`
-	Path        string `json:"path"`
-	OldPath     string `json:"old_path,omitempty"`
+	From    string `json:"from,omitempty"`
+	To      string `json:"to,omitempty"`
+	Status  string `json:"status"`
+	Path    string `json:"path"`
+	OldPath string `json:"old_path,omitempty"`
 }
 
 func outputJSON(out io.Writer, result *Result) error {
@@ -109,13 +109,13 @@ func outputJSON(out io.Writer, result *Result) error {
 		}
 		switch c.Status {
 		case Added:
-			jc.EndCommit = result.EndCommit
+			jc.To = result.To
 		case Modified:
-			jc.StartCommit = result.StartCommit
-			jc.EndCommit = result.EndCommit
+			jc.From = result.From
+			jc.To = result.To
 			jc.OldPath = c.OldPath
 		case Deleted:
-			jc.StartCommit = result.StartCommit
+			jc.From = result.From
 		}
 		if err := enc.Encode(jc); err != nil {
 			return err

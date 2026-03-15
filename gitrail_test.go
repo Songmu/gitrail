@@ -147,35 +147,35 @@ func TestRunJSONOutput(t *testing.T) {
 	if len(lines) != 3 {
 		t.Errorf("expected 3 JSON lines, got %d: %v", len(lines), lines)
 	}
-	// bar.go: Deleted → has start_commit, no end_commit
+	// bar.go: Deleted → has from, no to
 	if !strings.Contains(lines[0], `"status":"Deleted"`) {
 		t.Errorf("line 0 should be Deleted, got %q", lines[0])
 	}
-	if !strings.Contains(lines[0], `"start_commit"`) {
-		t.Errorf("line 0 (Deleted) should have start_commit, got %q", lines[0])
+	if !strings.Contains(lines[0], `"from"`) {
+		t.Errorf("line 0 (Deleted) should have from, got %q", lines[0])
 	}
-	if strings.Contains(lines[0], `"end_commit"`) {
-		t.Errorf("line 0 (Deleted) should not have end_commit, got %q", lines[0])
+	if strings.Contains(lines[0], `"to"`) {
+		t.Errorf("line 0 (Deleted) should not have to, got %q", lines[0])
 	}
-	// baz.go: Added → no start_commit, has end_commit
+	// baz.go: Added → no from, has to
 	if !strings.Contains(lines[1], `"status":"Added"`) {
 		t.Errorf("line 1 should be Added, got %q", lines[1])
 	}
-	if strings.Contains(lines[1], `"start_commit"`) {
-		t.Errorf("line 1 (Added) should not have start_commit, got %q", lines[1])
+	if strings.Contains(lines[1], `"from"`) {
+		t.Errorf("line 1 (Added) should not have from, got %q", lines[1])
 	}
-	if !strings.Contains(lines[1], `"end_commit"`) {
-		t.Errorf("line 1 (Added) should have end_commit, got %q", lines[1])
+	if !strings.Contains(lines[1], `"to"`) {
+		t.Errorf("line 1 (Added) should have to, got %q", lines[1])
 	}
-	// foo.go: Modified → has both start_commit and end_commit
+	// foo.go: Modified → has both from and to
 	if !strings.Contains(lines[2], `"status":"Modified"`) {
 		t.Errorf("line 2 should be Modified, got %q", lines[2])
 	}
-	if !strings.Contains(lines[2], `"start_commit"`) {
-		t.Errorf("line 2 (Modified) should have start_commit, got %q", lines[2])
+	if !strings.Contains(lines[2], `"from"`) {
+		t.Errorf("line 2 (Modified) should have from, got %q", lines[2])
 	}
-	if !strings.Contains(lines[2], `"end_commit"`) {
-		t.Errorf("line 2 (Modified) should have end_commit, got %q", lines[2])
+	if !strings.Contains(lines[2], `"to"`) {
+		t.Errorf("line 2 (Modified) should have to, got %q", lines[2])
 	}
 }
 

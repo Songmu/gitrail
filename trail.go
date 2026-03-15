@@ -31,9 +31,9 @@ type FileChange struct {
 
 // Result is the output from the Trail method.
 type Result struct {
-	StartCommit string
-	EndCommit   string
-	Changes     []FileChange
+	From    string
+	To      string
+	Changes []FileChange
 }
 
 // Gitrail tracks file changes over a given time period in a Git repository.
@@ -92,8 +92,8 @@ func trail(ctx context.Context, opts *trailOpts, errStream io.Writer) (*Result, 
 
 	if startCommit == endCommit {
 		return &Result{
-			StartCommit: startCommit,
-			EndCommit:   endCommit,
+			From: startCommit,
+			To:   endCommit,
 		}, nil
 	}
 
@@ -119,9 +119,9 @@ func trail(ctx context.Context, opts *trailOpts, errStream io.Writer) (*Result, 
 	})
 
 	return &Result{
-		StartCommit: startCommit,
-		EndCommit:   endCommit,
-		Changes:     changes,
+		From:    startCommit,
+		To:      endCommit,
+		Changes: changes,
 	}, nil
 }
 
