@@ -188,279 +188,220 @@ func TestParseRenameEvents(t *testing.T) {
 }
 
 func TestTrailBasic(t *testing.T) {
-	gm := newTestRepo(t)
-	ctx := context.Background()
-
-	// Initial commit: create foo.go and bar.go
-	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
-		"foo.go": "package main\n\nfunc foo() {}\n",
-		"bar.go": "package main\n\nfunc bar() {}\n",
-	})
-
-	// Commit 1: modify foo.go, delete bar.go, add baz.go
-	testCommit(t, gm, "2026-02-10T00:00:00Z", "changes", map[string]string{
-		"foo.go": "package main\n\nfunc foo() { /* modified */ }\n",
-		"baz.go": "package main\n\nfunc baz() {} // completely new file\n",
-	})
-	testDeleteCommit(t, gm, "2026-02-10T00:00:01Z", "bar.go", "delete bar")
-
-	result, err := trail(ctx, &trailOpts{
-		Dir:   gm.RepoPath(),
-		Since: "2026-01-15T00:00:00Z",
-		Until: "2026-03-01T00:00:00Z",
-	}, os.Stderr)
-	if err != nil {
-		t.Fatalf("trail: %v", err)
+	tests := []struct {
+		name  string
+		setup func(t *testing.T, gm *gitmock.GitMock)
+		opts  trailOpts
+		want  []FileChange
+	}{
+		{
+			name: "add_modify_delete",
+			setup: func(t *testing.T, gm *gitmock.GitMock) {
+				testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+					"foo.go": "package main\n\nfunc foo() {}\n",
+					"bar.go": "package main\n\nfunc bar() {}\n",
+				})
+				testCommit(t, gm, "2026-02-10T00:00:00Z", "changes", map[string]string{
+					"foo.go": "package main\n\nfunc foo() { /* modified */ }\n",
+					"baz.go": "package main\n\nfunc baz() {} // completely new file\n",
+				})
+				testDeleteCommit(t, gm, "2026-02-10T00:00:01Z", "bar.go", "delete bar")
+			},
+			opts: trailOpts{
+				Since: "2026-01-15T00:00:00Z",
+				Until: "2026-03-01T00:00:00Z",
+			},
+			want: []FileChange{
+				{Status: Deleted, Path: "bar.go"},
+				{Status: Added, Path: "baz.go"},
+				{Status: Modified, Path: "foo.go"},
+			},
+		},
+		{
+			name: "same_commit_no_changes",
+			setup: func(t *testing.T, gm *gitmock.GitMock) {
+				testCommit(t, gm, "2026-02-01T00:00:00Z", "only commit", map[string]string{
+					"foo.go": "package main\n",
+				})
+			},
+			opts: trailOpts{
+				Since: "2026-01-15T00:00:00Z",
+				Until: "2026-02-15T00:00:00Z",
+			},
+			want: nil,
+		},
+		{
+			name: "start_commit_fallback",
+			setup: func(t *testing.T, gm *gitmock.GitMock) {
+				testCommit(t, gm, "2026-02-01T00:00:00Z", "first commit", map[string]string{
+					"foo.go": "package main\n",
+				})
+			},
+			opts: trailOpts{
+				Since: "2026-01-01T00:00:00Z",
+				Until: "2026-03-01T00:00:00Z",
+			},
+			want: nil,
+		},
+		{
+			name: "rename",
+			setup: func(t *testing.T, gm *gitmock.GitMock) {
+				testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+					"old.go": "package main\n",
+				})
+				testCommit(t, gm, "2026-02-01T00:00:00Z", "modify", map[string]string{
+					"old.go": "package main\n\n// updated\n",
+				})
+				testRenameCommit(t, gm, "2026-03-01T00:00:00Z", "old.go", "new.go", "rename")
+			},
+			opts: trailOpts{
+				Since: "2026-01-05T00:00:00Z",
+				Until: "2026-04-01T00:00:00Z",
+			},
+			want: []FileChange{
+				{Status: Modified, Path: "new.go", OldPath: "old.go"},
+			},
+		},
+		{
+			name: "rename_chain",
+			setup: func(t *testing.T, gm *gitmock.GitMock) {
+				testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+					"a.go": "package main\n",
+				})
+				testRenameCommit(t, gm, "2026-02-01T00:00:00Z", "a.go", "b.go", "rename a→b")
+				testRenameCommit(t, gm, "2026-03-01T00:00:00Z", "b.go", "c.go", "rename b→c")
+			},
+			opts: trailOpts{
+				Since: "2026-01-05T00:00:00Z",
+				Until: "2026-04-01T00:00:00Z",
+			},
+			want: []FileChange{
+				{Status: Modified, Path: "c.go", OldPath: "a.go"},
+			},
+		},
+		{
+			name: "rename_new_file_ignored",
+			setup: func(t *testing.T, gm *gitmock.GitMock) {
+				testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+					"existing.go": "package main\n",
+				})
+				testCommit(t, gm, "2026-02-01T00:00:00Z", "add new.go", map[string]string{
+					"new.go": "package main\n",
+				})
+				testRenameCommit(t, gm, "2026-03-01T00:00:00Z", "new.go", "renamed.go", "rename new→renamed")
+			},
+			opts: trailOpts{
+				Since: "2026-01-05T00:00:00Z",
+				Until: "2026-04-01T00:00:00Z",
+			},
+			want: []FileChange{
+				{Status: Added, Path: "renamed.go"},
+			},
+		},
+		{
+			name: "pathspec",
+			setup: func(t *testing.T, gm *gitmock.GitMock) {
+				testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+					"src/foo.go":   "package main\n",
+					"tests/bar.go": "package main\n",
+				})
+				testCommit(t, gm, "2026-02-10T00:00:00Z", "modify both", map[string]string{
+					"src/foo.go":   "package main\n\n// modified\n",
+					"tests/bar.go": "package main\n\n// modified\n",
+				})
+			},
+			opts: trailOpts{
+				Since:     "2026-01-15T00:00:00Z",
+				Until:     "2026-03-01T00:00:00Z",
+				Pathspecs: []string{"src/"},
+			},
+			want: []FileChange{
+				{Status: Modified, Path: "src/foo.go"},
+			},
+		},
 	}
 
-	want := []FileChange{
-		{Status: Deleted, Path: "bar.go"},
-		{Status: Added, Path: "baz.go"},
-		{Status: Modified, Path: "foo.go"},
-	}
-	if !reflect.DeepEqual(result.Changes, want) {
-		t.Errorf("Changes = %v, want %v", result.Changes, want)
-	}
-}
-
-func TestTrailSameCommit(t *testing.T) {
-	gm := newTestRepo(t)
-	ctx := context.Background()
-
-	testCommit(t, gm, "2026-02-01T00:00:00Z", "only commit", map[string]string{
-		"foo.go": "package main\n",
-	})
-
-	// both since and until resolve to the same commit
-	result, err := trail(ctx, &trailOpts{
-		Dir:   gm.RepoPath(),
-		Since: "2026-01-15T00:00:00Z",
-		Until: "2026-02-15T00:00:00Z",
-	}, os.Stderr)
-	if err != nil {
-		t.Fatalf("trail: %v", err)
-	}
-
-	if result.From != result.To {
-		t.Errorf("expected From == To, got %s vs %s", result.From, result.To)
-	}
-	if len(result.Changes) != 0 {
-		t.Errorf("expected no changes, got %v", result.Changes)
-	}
-}
-
-func TestTrailStartCommitFallback(t *testing.T) {
-	gm := newTestRepo(t)
-	ctx := context.Background()
-
-	// Only one commit, created after since
-	h := testCommit(t, gm, "2026-02-01T00:00:00Z", "first commit", map[string]string{
-		"foo.go": "package main\n",
-	})
-
-	// since is before the only commit → fallback triggers
-	result, err := trail(ctx, &trailOpts{
-		Dir:   gm.RepoPath(),
-		Since: "2026-01-01T00:00:00Z",
-		Until: "2026-03-01T00:00:00Z",
-	}, os.Stderr)
-	if err != nil {
-		t.Fatalf("trail: %v", err)
-	}
-
-	// fallback start commit = first commit after since = h
-	// end commit also = h (--before=2026-03-01 finds h)
-	if result.From != h {
-		t.Errorf("From = %s, want %s", result.From, h)
-	}
-	if result.From != result.To {
-		t.Errorf("expected same commit, got %s vs %s", result.From, result.To)
-	}
-	if len(result.Changes) != 0 {
-		t.Errorf("expected no changes for same commit, got %v", result.Changes)
-	}
-}
-
-func TestTrailEndCommitNotFound(t *testing.T) {
-	gm := newTestRepo(t)
-	ctx := context.Background()
-
-	testCommit(t, gm, "2026-02-01T00:00:00Z", "first commit", map[string]string{
-		"foo.go": "package main\n",
-	})
-
-	// until is before any commits
-	_, err := trail(ctx, &trailOpts{
-		Dir:   gm.RepoPath(),
-		Since: "2025-01-01T00:00:00Z",
-		Until: "2025-12-31T00:00:00Z",
-	}, os.Stderr)
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
-	if ec, ok := err.(interface{ ExitCode() int }); !ok || ec.ExitCode() != 2 {
-		t.Errorf("expected exit code 2, got err=%v", err)
-	}
-}
-
-func TestTrailStartCommitNotFound(t *testing.T) {
-	gm := newTestRepo(t)
-	ctx := context.Background()
-
-	// empty repo: no commits at all
-	_, _, _ = gm.Do("config", "user.email", "test@example.com")
-	_, _, _ = gm.Do("config", "user.name", "Test User")
-
-	_, err := trail(ctx, &trailOpts{
-		Dir:   gm.RepoPath(),
-		Since: "2026-01-01T00:00:00Z",
-		Until: "2026-12-31T00:00:00Z",
-	}, os.Stderr)
-	if err == nil {
-		t.Fatal("expected error for empty repo, got nil")
-	}
-}
-
-func TestTrailReversedCommits(t *testing.T) {
-	gm := newTestRepo(t)
-	ctx := context.Background()
-
-	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
-		"foo.go": "package main\n",
-	})
-	testCommit(t, gm, "2026-02-10T00:00:00Z", "update", map[string]string{
-		"foo.go": "package main\n\n// v2\n",
-	})
-
-	// since is later than until → reversed commits
-	_, err := trail(ctx, &trailOpts{
-		Dir:   gm.RepoPath(),
-		Since: "2026-02-15T00:00:00Z", // → endCommit of since = commit at 2026-02-10
-		Until: "2026-01-15T00:00:00Z", // → endCommit of until = commit at 2026-01-10
-	}, os.Stderr)
-	if err == nil {
-		t.Fatal("expected error for reversed commits, got nil")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gm := newTestRepo(t)
+			tt.setup(t, gm)
+			opts := tt.opts
+			opts.Dir = gm.RepoPath()
+			result, err := trail(context.Background(), &opts, os.Stderr)
+			if err != nil {
+				t.Fatalf("trail: %v", err)
+			}
+			if !reflect.DeepEqual(result.Changes, tt.want) {
+				t.Errorf("Changes = %v, want %v", result.Changes, tt.want)
+			}
+		})
 	}
 }
 
-func TestTrailRename(t *testing.T) {
-	gm := newTestRepo(t)
-	ctx := context.Background()
-
-	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
-		"old.go": "package main\n",
-	})
-	// modify old.go
-	testCommit(t, gm, "2026-02-01T00:00:00Z", "modify", map[string]string{
-		"old.go": "package main\n\n// updated\n",
-	})
-	// rename old.go → new.go
-	testRenameCommit(t, gm, "2026-03-01T00:00:00Z", "old.go", "new.go", "rename")
-
-	result, err := trail(ctx, &trailOpts{
-		Dir:   gm.RepoPath(),
-		Since: "2026-01-05T00:00:00Z",
-		Until: "2026-04-01T00:00:00Z",
-	}, os.Stderr)
-	if err != nil {
-		t.Fatalf("trail: %v", err)
+func TestTrailError(t *testing.T) {
+	tests := []struct {
+		name         string
+		setup        func(t *testing.T, gm *gitmock.GitMock)
+		opts         trailOpts
+		wantExitCode int // 0 means just check error is non-nil
+	}{
+		{
+			name: "end_commit_not_found",
+			setup: func(t *testing.T, gm *gitmock.GitMock) {
+				testCommit(t, gm, "2026-02-01T00:00:00Z", "first commit", map[string]string{
+					"foo.go": "package main\n",
+				})
+			},
+			opts: trailOpts{
+				Since: "2025-01-01T00:00:00Z",
+				Until: "2025-12-31T00:00:00Z",
+			},
+			wantExitCode: 2,
+		},
+		{
+			name: "start_commit_not_found_empty_repo",
+			setup: func(t *testing.T, gm *gitmock.GitMock) {
+				// empty repo: no commits
+			},
+			opts: trailOpts{
+				Since: "2026-01-01T00:00:00Z",
+				Until: "2026-12-31T00:00:00Z",
+			},
+		},
+		{
+			name: "reversed_commits",
+			setup: func(t *testing.T, gm *gitmock.GitMock) {
+				testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+					"foo.go": "package main\n",
+				})
+				testCommit(t, gm, "2026-02-10T00:00:00Z", "update", map[string]string{
+					"foo.go": "package main\n\n// v2\n",
+				})
+			},
+			opts: trailOpts{
+				Since: "2026-02-15T00:00:00Z",
+				Until: "2026-01-15T00:00:00Z",
+			},
+		},
 	}
 
-	want := []FileChange{
-		{Status: Modified, Path: "new.go", OldPath: "old.go"},
-	}
-	if !reflect.DeepEqual(result.Changes, want) {
-		t.Errorf("Changes = %v, want %v", result.Changes, want)
-	}
-}
-
-func TestTrailRenameChain(t *testing.T) {
-	gm := newTestRepo(t)
-	ctx := context.Background()
-
-	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
-		"a.go": "package main\n",
-	})
-	testRenameCommit(t, gm, "2026-02-01T00:00:00Z", "a.go", "b.go", "rename a→b")
-	testRenameCommit(t, gm, "2026-03-01T00:00:00Z", "b.go", "c.go", "rename b→c")
-
-	result, err := trail(ctx, &trailOpts{
-		Dir:   gm.RepoPath(),
-		Since: "2026-01-05T00:00:00Z",
-		Until: "2026-04-01T00:00:00Z",
-	}, os.Stderr)
-	if err != nil {
-		t.Fatalf("trail: %v", err)
-	}
-
-	want := []FileChange{
-		{Status: Modified, Path: "c.go", OldPath: "a.go"},
-	}
-	if !reflect.DeepEqual(result.Changes, want) {
-		t.Errorf("Changes = %v, want %v", result.Changes, want)
-	}
-}
-
-func TestTrailRenameNewFileIgnored(t *testing.T) {
-	gm := newTestRepo(t)
-	ctx := context.Background()
-
-	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
-		"existing.go": "package main\n",
-	})
-	// Add new.go (didn't exist at start)
-	testCommit(t, gm, "2026-02-01T00:00:00Z", "add new.go", map[string]string{
-		"new.go": "package main\n",
-	})
-	// Rename new.go → renamed.go
-	testRenameCommit(t, gm, "2026-03-01T00:00:00Z", "new.go", "renamed.go", "rename new→renamed")
-
-	result, err := trail(ctx, &trailOpts{
-		Dir:   gm.RepoPath(),
-		Since: "2026-01-05T00:00:00Z",
-		Until: "2026-04-01T00:00:00Z",
-	}, os.Stderr)
-	if err != nil {
-		t.Fatalf("trail: %v", err)
-	}
-
-	// renamed.go should be Added (not Modified), because new.go didn't exist at start
-	want := []FileChange{
-		{Status: Added, Path: "renamed.go"},
-	}
-	if !reflect.DeepEqual(result.Changes, want) {
-		t.Errorf("Changes = %v, want %v", result.Changes, want)
-	}
-}
-
-func TestTrailPathspec(t *testing.T) {
-	gm := newTestRepo(t)
-	ctx := context.Background()
-
-	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
-		"src/foo.go":   "package main\n",
-		"tests/bar.go": "package main\n",
-	})
-	testCommit(t, gm, "2026-02-10T00:00:00Z", "modify both", map[string]string{
-		"src/foo.go":   "package main\n\n// modified\n",
-		"tests/bar.go": "package main\n\n// modified\n",
-	})
-
-	result, err := trail(ctx, &trailOpts{
-		Dir:       gm.RepoPath(),
-		Since:     "2026-01-15T00:00:00Z",
-		Until:     "2026-03-01T00:00:00Z",
-		Pathspecs: []string{"src/"},
-	}, os.Stderr)
-	if err != nil {
-		t.Fatalf("trail: %v", err)
-	}
-
-	want := []FileChange{
-		{Status: Modified, Path: "src/foo.go"},
-	}
-	if !reflect.DeepEqual(result.Changes, want) {
-		t.Errorf("Changes = %v, want %v", result.Changes, want)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gm := newTestRepo(t)
+			tt.setup(t, gm)
+			opts := tt.opts
+			opts.Dir = gm.RepoPath()
+			_, err := trail(context.Background(), &opts, os.Stderr)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+			if tt.wantExitCode != 0 {
+				ec, ok := err.(interface{ ExitCode() int })
+				if !ok || ec.ExitCode() != tt.wantExitCode {
+					t.Errorf("expected exit code %d, got err=%v", tt.wantExitCode, err)
+				}
+			}
+		})
 	}
 }
 
