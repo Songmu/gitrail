@@ -33,7 +33,7 @@ type FileChange struct {
 type Result struct {
 	From    string
 	To      string
-	Changes     []FileChange
+	Changes []FileChange
 }
 
 // Gitrail tracks file changes over a given time period in a Git repository.
@@ -121,7 +121,7 @@ func trail(ctx context.Context, opts *trailOpts, errStream io.Writer) (*Result, 
 	return &Result{
 		From:    startCommit,
 		To:      endCommit,
-		Changes:     changes,
+		Changes: changes,
 	}, nil
 }
 

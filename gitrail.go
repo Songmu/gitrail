@@ -95,9 +95,9 @@ func outputText(out io.Writer, result *Result) error {
 type jsonFileChange struct {
 	From    string `json:"from,omitempty"`
 	To      string `json:"to,omitempty"`
-	Status      string `json:"status"`
-	Path        string `json:"path"`
-	OldPath     string `json:"old_path,omitempty"`
+	Status  string `json:"status"`
+	Path    string `json:"path"`
+	OldPath string `json:"old_path,omitempty"`
 }
 
 func outputJSON(out io.Writer, result *Result) error {
