@@ -1,7 +1,7 @@
 ---
 name: gitrail
 description: >
-  CLI and Go library that tracks file changes (added, modified, deleted, renamed)
+  CLI that tracks file changes (added, modified, deleted, renamed)
   over a time period in a Git repository, with rename chain detection.
   Keywords: git, diff, file changes, rename tracking.
 license: MIT
@@ -44,9 +44,11 @@ gitrail --since="2026-01-01" --until="2026-03-01" -- 'src/' ':!vendor/'
 
 ### Text Output Format
 
-The first line is `<from-commit>..<to-commit>`. Each subsequent line is a tab-separated record:
+The output begins with `<from-commit>..<to-commit>` on the first line, followed by a blank line, then tab-separated records:
 
 ```
+abc123..def456
+
 A	src/new.go
 D	src/removed.go
 M	src/bar.go	src/old_bar.go
@@ -87,26 +89,6 @@ Schema: `schema/output.schema.json` in the repository root.
 | 1 | Error (not a git repo, reversed commits, start commit not found, etc.) |
 | 2 | End commit not found (time range is out of repository history) |
 
-## Library Usage
-
-```go
-import "github.com/Songmu/gitrail"
-
-g := gitrail.New("/path/to/repo")
-result, err := g.Trail(ctx, "main",
-    time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
-    time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC),
-)
-if err != nil {
-    // handle error
-}
-for _, c := range result.Changes {
-    fmt.Printf("%s\t%s\n", c.Status, c.Path)
-}
-```
-
-`result.From` and `result.To` hold the bounding commit SHAs.
-
 ## Common Agent Use Cases
 
 **Find all files that changed in the last month:**
@@ -128,3 +110,4 @@ gitrail --since="2026-01-01" --until="2026-03-01" -- '*.go' ':!*_gen.go'
 ```bash
 gitrail --since="2026-01-01" --until="2026-03-01" --json | jq 'select(.status=="Added")'
 ```
+
