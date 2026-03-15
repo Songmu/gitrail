@@ -319,9 +319,6 @@ func TestTrailStartCommitNotFound(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for empty repo, got nil")
 	}
-	if ec, ok := err.(interface{ ExitCode() int }); !ok || ec.ExitCode() != 1 {
-		t.Errorf("expected exit code 1, got err=%v", err)
-	}
 }
 
 func TestTrailReversedCommits(t *testing.T) {
@@ -343,9 +340,6 @@ func TestTrailReversedCommits(t *testing.T) {
 	}, os.Stderr)
 	if err == nil {
 		t.Fatal("expected error for reversed commits, got nil")
-	}
-	if ec, ok := err.(interface{ ExitCode() int }); !ok || ec.ExitCode() != 1 {
-		t.Errorf("expected exit code 1 for reversed commits, got err=%v", err)
 	}
 }
 

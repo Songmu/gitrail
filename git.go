@@ -34,7 +34,7 @@ func gitCmd(ctx context.Context, dir string, errStream io.Writer, args ...string
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	if err := cmd.Run(); err != nil {
-		return "", exitErrorf(1, "git %s failed: %w", strings.Join(args, " "), err)
+		return "", fmt.Errorf("git %s failed: %w", strings.Join(args, " "), err)
 	}
 	return strings.TrimSpace(buf.String()), nil
 }

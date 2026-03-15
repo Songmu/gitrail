@@ -31,11 +31,11 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 	}
 	if *since == "" {
 		fs.Usage()
-		return newExitError(1, "--since is required")
+		return fmt.Errorf("--since is required")
 	}
 	if *until == "" {
 		fs.Usage()
-		return newExitError(1, "--until is required")
+		return fmt.Errorf("--until is required")
 	}
 
 	result, err := trail(ctx, &trailOpts{

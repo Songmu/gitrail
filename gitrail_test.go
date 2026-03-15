@@ -26,9 +26,6 @@ func TestRunMissingSince(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for missing --since")
 	}
-	if ec, ok := err.(interface{ ExitCode() int }); !ok || ec.ExitCode() != 1 {
-		t.Errorf("expected exit code 1, got %v", err)
-	}
 }
 
 func TestRunMissingUntil(t *testing.T) {
@@ -36,9 +33,6 @@ func TestRunMissingUntil(t *testing.T) {
 	err := Run(context.Background(), []string{"--since=2026-01-01"}, &out, &errOut)
 	if err == nil {
 		t.Fatal("expected error for missing --until")
-	}
-	if ec, ok := err.(interface{ ExitCode() int }); !ok || ec.ExitCode() != 1 {
-		t.Errorf("expected exit code 1, got %v", err)
 	}
 }
 
