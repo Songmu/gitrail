@@ -241,8 +241,8 @@ func TestTrailSameCommit(t *testing.T) {
 		t.Fatalf("trail: %v", err)
 	}
 
-	if result.StartCommit != result.EndCommit {
-		t.Errorf("expected StartCommit == EndCommit, got %s vs %s", result.StartCommit, result.EndCommit)
+	if result.From != result.To {
+		t.Errorf("expected From == To, got %s vs %s", result.From, result.To)
 	}
 	if len(result.Changes) != 0 {
 		t.Errorf("expected no changes, got %v", result.Changes)
@@ -270,11 +270,11 @@ func TestTrailStartCommitFallback(t *testing.T) {
 
 	// fallback start commit = first commit after since = h
 	// end commit also = h (--before=2026-03-01 finds h)
-	if result.StartCommit != h {
-		t.Errorf("StartCommit = %s, want %s", result.StartCommit, h)
+	if result.From != h {
+		t.Errorf("From = %s, want %s", result.From, h)
 	}
-	if result.StartCommit != result.EndCommit {
-		t.Errorf("expected same commit, got %s vs %s", result.StartCommit, result.EndCommit)
+	if result.From != result.To {
+		t.Errorf("expected same commit, got %s vs %s", result.From, result.To)
 	}
 	if len(result.Changes) != 0 {
 		t.Errorf("expected no changes for same commit, got %v", result.Changes)

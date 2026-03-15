@@ -85,9 +85,9 @@ func (g *Gitrail) Trail(ctx context.Context, branch string, since, until time.Ti
 
 ```go
 type Result struct {
-    StartCommit string       // 起点コミットハッシュ
-    EndCommit   string       // 終点コミットハッシュ
-    Changes     []FileChange // パス名のアルファベット順でソート済み
+    From    string       // 起点コミットハッシュ
+    To      string       // 終点コミットハッシュ
+    Changes []FileChange // パス名のアルファベット順でソート済み
 }
 
 type FileChange struct {
@@ -138,10 +138,10 @@ abc123..def456
 差分がない場合は出力なし（0行）。
 
 ```jsonl
-{"end_commit":"def456","status":"Added","path":"src/new.go"}
-{"start_commit":"abc123","end_commit":"def456","status":"Modified","path":"src/foo.go"}
-{"start_commit":"abc123","end_commit":"def456","status":"Modified","path":"src/bar.go","old_path":"src/old_bar.go"}
-{"start_commit":"abc123","status":"Deleted","path":"src/removed.go"}
+{"to":"def456","status":"Added","path":"src/new.go"}
+{"from":"abc123","to":"def456","status":"Modified","path":"src/foo.go"}
+{"from":"abc123","to":"def456","status":"Modified","path":"src/bar.go","old_path":"src/old_bar.go"}
+{"from":"abc123","status":"Deleted","path":"src/removed.go"}
 ```
 
 ### エラーハンドリング

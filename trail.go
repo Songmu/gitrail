@@ -31,8 +31,8 @@ type FileChange struct {
 
 // Result is the output from the Trail method.
 type Result struct {
-	StartCommit string
-	EndCommit   string
+	From    string
+	To      string
 	Changes     []FileChange
 }
 
@@ -92,8 +92,8 @@ func trail(ctx context.Context, opts *trailOpts, errStream io.Writer) (*Result, 
 
 	if startCommit == endCommit {
 		return &Result{
-			StartCommit: startCommit,
-			EndCommit:   endCommit,
+			From: startCommit,
+			To:   endCommit,
 		}, nil
 	}
 
@@ -119,8 +119,8 @@ func trail(ctx context.Context, opts *trailOpts, errStream io.Writer) (*Result, 
 	})
 
 	return &Result{
-		StartCommit: startCommit,
-		EndCommit:   endCommit,
+		From:    startCommit,
+		To:      endCommit,
 		Changes:     changes,
 	}, nil
 }
