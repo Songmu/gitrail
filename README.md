@@ -38,6 +38,18 @@ M	src/foo.go
 
 Time formats are passed directly to git — ISO 8601 (`2026-01-01`), relative dates (`"1 month ago"`), etc. are all supported.
 
+### Pathspec Filtering
+
+Use `--` to pass pathspec patterns and restrict the output to specific paths:
+
+```console
+# Only show changes under src/
+% gitrail --since="2026-01-01" --until="2026-03-01" -- 'src/'
+
+# Only .go files, excluding vendor/
+% gitrail --since="2026-01-01" --until="2026-03-01" -- '*.go' ':!vendor/'
+```
+
 ### NDJSON Output
 
 With `--json`, each line is a self-contained JSON object:
