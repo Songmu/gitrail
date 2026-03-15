@@ -90,7 +90,7 @@ Each line of output is a JSON object describing one changed file:
   "allOf": [
     {
       "if": { "properties": { "status": { "const": "Added" } } },
-      "then": { "required": ["to"], "properties": { "from": false } }
+      "then": { "required": ["to"], "properties": { "from": false, "old_path": false } }
     },
     {
       "if": { "properties": { "status": { "const": "Modified" } } },
@@ -98,7 +98,7 @@ Each line of output is a JSON object describing one changed file:
     },
     {
       "if": { "properties": { "status": { "const": "Deleted" } } },
-      "then": { "required": ["from"], "properties": { "to": false } }
+      "then": { "required": ["from"], "properties": { "to": false, "old_path": false } }
     }
   ],
   "additionalProperties": false
