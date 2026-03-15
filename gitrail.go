@@ -21,7 +21,7 @@ const cmdName = "gitrail"
 func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) error {
 	log.SetOutput(errStream)
 	if len(argv) > 0 && argv[0] == "skills" {
-		s, err := skillsmith.New("gitrail", version, skillsFS)
+		s, err := skillsmith.New(cmdName, version, skillsFS)
 		if err != nil {
 			return err
 		}
