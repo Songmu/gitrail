@@ -72,6 +72,23 @@ The JSON schema is available at [`schema/output.schema.json`](schema/output.sche
 | 1 | Error (not a repo, reversed commits, start commit not found, etc.) |
 | 2 | End commit not found (out of history range) |
 
+## Agent Skills
+
+gitrail ships an [agentskills](https://agentskills.io)-compatible skill definition so coding agents can discover and use it directly.
+
+```console
+# List embedded skills
+% gitrail skills list
+
+# Install skill(s) for the current user
+% gitrail skills install
+
+# Install into the current repository
+% gitrail skills install --scope=repo
+```
+
+Run `gitrail skills --help` for all available subcommands.
+
 ## Library Usage
 
 ```go

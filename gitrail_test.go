@@ -8,6 +8,21 @@ import (
 	"testing"
 )
 
+func TestRunSkillsList(t *testing.T) {
+	var out, errOut bytes.Buffer
+	err := Run(context.Background(), []string{"skills", "list"}, &out, &errOut)
+	if err != nil {
+		t.Fatalf("Run skills list: %v", err)
+	}
+	got := out.String()
+	if !strings.Contains(got, "gitrail") {
+		t.Errorf("skills list output %q should contain skill name 'gitrail'", got)
+	}
+	if !strings.Contains(got, "git") {
+		t.Errorf("skills list output %q should contain skill description mentioning 'git'", got)
+	}
+}
+
 func TestRunVersion(t *testing.T) {
 	var out bytes.Buffer
 	err := Run(context.Background(), []string{"--version"}, &out, os.Stderr)

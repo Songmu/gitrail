@@ -2,21 +2,43 @@ package gitrail
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"log"
+
+	"github.com/Songmu/skillsmith"
 )
+
+//go:embed skills
+var skillsFS embed.FS
 
 const cmdName = "gitrail"
 
 // Run the gitrail
 func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) error {
 	log.SetOutput(errStream)
+	if len(argv) > 0 && argv[0] == "skills" {
+		s, err := skillsmith.New(cmdName, version, skillsFS)
+		if err != nil {
+			return err
+		}
+		s.OutWriter = outStream
+		s.ErrWriter = errStream
+		return s.Run(ctx, argv[1:])
+	}
 	fs := flag.NewFlagSet(
 		fmt.Sprintf("%s (v%s rev:%s)", cmdName, version, revision), flag.ContinueOnError)
 	fs.SetOutput(errStream)
+	fs.Usage = func() {
+		fmt.Fprintf(fs.Output(), "Usage: %s [options] [-- pathspec...]\n\n", cmdName)
+		fmt.Fprintf(fs.Output(), "Subcommands:\n")
+		fmt.Fprintf(fs.Output(), "  skills    manage and distribute agent skills\n\n")
+		fmt.Fprintf(fs.Output(), "Options:\n")
+		fs.PrintDefaults()
+	}
 	ver := fs.Bool("version", false, "display version")
 	since := fs.String("since", "", "start time (required)")
 	until := fs.String("until", "", "end time (required)")
