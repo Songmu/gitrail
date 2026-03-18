@@ -23,6 +23,7 @@ A	src/new.go
 D	src/removed.go
 M	src/bar.go	src/old_bar.go
 M	src/foo.go
+R	src/baz.go	src/old_baz.go
 ```
 
 ### Flags
@@ -59,6 +60,7 @@ With `--json`, each line is a self-contained JSON object:
 {"to":"def456","status":"Added","path":"src/new.go"}
 {"from":"abc123","to":"def456","status":"Modified","path":"src/foo.go"}
 {"from":"abc123","to":"def456","status":"Modified","path":"src/bar.go","old_path":"src/old_bar.go"}
+{"from":"abc123","to":"def456","status":"Renamed","path":"src/baz.go","old_path":"src/old_baz.go"}
 {"from":"abc123","status":"Deleted","path":"src/removed.go"}
 ```
 

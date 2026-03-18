@@ -104,6 +104,8 @@ func outputText(out io.Writer, result *Result) error {
 			} else {
 				line = fmt.Sprintf("M\t%s", c.Path)
 			}
+		case Renamed:
+			line = fmt.Sprintf("R\t%s\t%s", c.Path, c.OldPath)
 		case Deleted:
 			line = fmt.Sprintf("D\t%s", c.Path)
 		}
@@ -133,6 +135,10 @@ func outputJSON(out io.Writer, result *Result) error {
 		case Added:
 			jc.To = result.To
 		case Modified:
+			jc.From = result.From
+			jc.To = result.To
+			jc.OldPath = c.OldPath
+		case Renamed:
 			jc.From = result.From
 			jc.To = result.To
 			jc.OldPath = c.OldPath

@@ -16,8 +16,10 @@ type ChangeStatus string
 const (
 	// Added means the file was added.
 	Added ChangeStatus = "Added"
-	// Modified means the file was modified (or renamed).
+	// Modified means the file was modified. If also renamed, OldPath is set.
 	Modified ChangeStatus = "Modified"
+	// Renamed means the file was renamed with no content change. OldPath is set.
+	Renamed ChangeStatus = "Renamed"
 	// Deleted means the file was deleted.
 	Deleted ChangeStatus = "Deleted"
 )
@@ -26,7 +28,7 @@ const (
 type FileChange struct {
 	Status  ChangeStatus
 	Path    string // path at end commit (or start commit for Deleted)
-	OldPath string // rename source path (only set when renamed)
+	OldPath string // rename source path (only set when Status is Renamed or Modified with rename)
 }
 
 // Result is the output from the Trail method.
@@ -185,7 +187,7 @@ func validateAncestor(ctx context.Context, dir, startCommit, endCommit string, e
 }
 
 func getDiff(ctx context.Context, dir, startCommit, endCommit string, pathspecs []string, errStream io.Writer) ([]FileChange, error) {
-	args := []string{"diff", "--name-status", startCommit, endCommit}
+	args := []string{"diff", "--name-status", "--no-renames", startCommit, endCommit}
 	if len(pathspecs) > 0 {
 		args = append(args, "--")
 		args = append(args, pathspecs...)
@@ -356,8 +358,17 @@ func applyRenameDetection(ctx context.Context, dir, startCommit, endCommit strin
 		}
 		if c.Status == Added {
 			if origin, ok := renameMapping[c.Path]; ok {
+				// Check whether content changed between origin at startCommit and path at endCommit.
+				_, exitCode, err := gitCmdAllowFail(ctx, dir, errStream, "diff", "--quiet", startCommit+":"+origin, endCommit+":"+c.Path)
+				if err != nil {
+					return nil, err
+				}
+				status := Modified
+				if exitCode == 0 {
+					status = Renamed
+				}
 				result = append(result, FileChange{
-					Status:  Modified,
+					Status:  status,
 					Path:    c.Path,
 					OldPath: origin,
 				})

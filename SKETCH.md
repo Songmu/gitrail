@@ -91,9 +91,9 @@ type Result struct {
 }
 
 type FileChange struct {
-    Status  ChangeStatus // Added | Modified | Deleted
+    Status  ChangeStatus // Added | Modified | Renamed | Deleted
     Path    string       // 終点時点のファイルパス。Deletedの場合は起点時点のパス
-    OldPath string       // リネーム元パス。リネームがあった場合のみ設定
+    OldPath string       // リネーム元パス。RenamedまたはModified（リネームあり）の場合のみ設定
 }
 
 type ChangeStatus string
@@ -101,12 +101,13 @@ type ChangeStatus string
 const (
     Added    ChangeStatus = "Added"
     Modified ChangeStatus = "Modified"
+    Renamed  ChangeStatus = "Renamed"
     Deleted  ChangeStatus = "Deleted"
 )
 ```
 
-- ステータスは3種のみ。Gitの Renamed/Copied/TypeChanged 等は扱わない
-	- リネームはOldPathの有無で表現する
+- ステータスは4種。Gitの Copied/TypeChanged 等は扱わない
+	- リネームのみ（内容変更なし）は `Renamed`、内容変更ありのリネームは `Modified`（OldPathあり）
 	- Copied は Added として扱う
 	- TypeChanged は Modified として扱う
 
@@ -124,6 +125,7 @@ abc123..def456
 A	src/new.go
 M	src/foo.go
 M	src/bar.go	src/old_bar.go
+R	src/baz.go	src/old_baz.go
 D	src/removed.go
 ```
 
@@ -141,6 +143,7 @@ abc123..def456
 {"to":"def456","status":"Added","path":"src/new.go"}
 {"from":"abc123","to":"def456","status":"Modified","path":"src/foo.go"}
 {"from":"abc123","to":"def456","status":"Modified","path":"src/bar.go","old_path":"src/old_bar.go"}
+{"from":"abc123","to":"def456","status":"Renamed","path":"src/baz.go","old_path":"src/old_baz.go"}
 {"from":"abc123","status":"Deleted","path":"src/removed.go"}
 ```
 
