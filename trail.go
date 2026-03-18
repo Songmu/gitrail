@@ -358,22 +358,27 @@ func applyRenameDetection(ctx context.Context, dir, startCommit, endCommit strin
 		}
 		if c.Status == Added {
 			if origin, ok := renameMapping[c.Path]; ok {
-				// Check whether content changed between origin at startCommit and path at endCommit.
-				_, exitCode, err := gitCmdAllowFail(ctx, dir, errStream, "diff", "--quiet", startCommit+":"+origin, endCommit+":"+c.Path)
+				// Check whether content changed between origin at startCommit and path at endCommit
+				// by comparing their blob object IDs instead of running a full git diff.
+				out, exitCode, err := gitCmdAllowFail(ctx, dir, errStream, "rev-parse", startCommit+":"+origin, endCommit+":"+c.Path)
 				if err != nil {
 					return nil, err
 				}
+				if exitCode != 0 {
+					// Any non-zero exit code indicates a git error; surface it instead of silently
+					// treating this as a content change.
+					return nil, fmt.Errorf("git rev-parse failed with exit code %d for %s -> %s", exitCode, origin, c.Path)
+				}
+				fields := strings.Fields(out)
+				if len(fields) < 2 {
+					return nil, fmt.Errorf("unexpected git rev-parse output for %s -> %s: %q", origin, c.Path, out)
+				}
+				originBlob := fields[0]
+				destBlob := fields[1]
 				status := Modified
-				switch exitCode {
-				case 0:
+				if originBlob == destBlob {
 					// No content change between origin and current path; treat as a pure rename.
 					status = Renamed
-				case 1:
-					// Content differs; keep status as Modified.
-				default:
-					// Any other exit code indicates a git error; surface it instead of silently
-					// treating this as a content change.
-					return nil, fmt.Errorf("git diff --quiet failed with exit code %d for %s -> %s", exitCode, origin, c.Path)
 				}
 				result = append(result, FileChange{
 					Status:  status,
