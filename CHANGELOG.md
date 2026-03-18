@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.0.3](https://github.com/Songmu/gitrail/compare/v0.0.2...v0.0.3) - 2026-03-18
+- Add Renamed status for pure renames by @Songmu in https://github.com/Songmu/gitrail/pull/10
+
 ## [v0.0.2](https://github.com/Songmu/gitrail/compare/v0.0.1...v0.0.2) - 2026-03-15
 - Add Agent Skills and skillsmith integration by @Copilot in https://github.com/Songmu/gitrail/pull/8
 
