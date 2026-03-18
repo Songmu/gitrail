@@ -103,6 +103,45 @@ func TestRunTextOutput(t *testing.T) {
 	}
 }
 
+func TestRunTextOutputWithRename(t *testing.T) {
+	gm := newTestRepo(t)
+	ctx := context.Background()
+
+	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+		"old.go": "package main\n",
+	})
+	testRenameCommit(t, gm, "2026-02-01T00:00:00Z", "old.go", "new.go", "rename")
+
+	var out bytes.Buffer
+	err := Run(ctx, []string{
+		"-C", gm.RepoPath(),
+		"--since=2026-01-05T00:00:00Z",
+		"--until=2026-03-01T00:00:00Z",
+	}, &out, os.Stderr)
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+
+	got := out.String()
+	lines := strings.Split(strings.TrimRight(got, "\n"), "\n")
+	// First line is commit range header
+	if !strings.Contains(lines[0], "..") {
+		t.Errorf("first line should be commit range, got %q", lines[0])
+	}
+	// Second line is blank
+	if len(lines) < 2 || lines[1] != "" {
+		t.Errorf("second line should be blank, got %q", lines[1])
+	}
+	// One file line: R\tnew.go\told.go
+	fileLines := lines[2:]
+	if len(fileLines) != 1 {
+		t.Errorf("expected 1 file line, got %d: %v", len(fileLines), fileLines)
+	}
+	if fileLines[0] != "R\tnew.go\told.go" {
+		t.Errorf("expected R\\tnew.go\\told.go, got %q", fileLines[0])
+	}
+}
+
 func TestRunTextOutputNoChanges(t *testing.T) {
 	gm := newTestRepo(t)
 	ctx := context.Background()
