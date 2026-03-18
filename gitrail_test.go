@@ -124,18 +124,27 @@ func TestRunTextOutputWithRename(t *testing.T) {
 
 	got := out.String()
 	lines := strings.Split(strings.TrimRight(got, "\n"), "\n")
+	if len(lines) < 1 {
+		t.Fatalf("expected at least 1 line (commit range header), got %d lines: %v", len(lines), lines)
+	}
 	// First line is commit range header
 	if !strings.Contains(lines[0], "..") {
 		t.Errorf("first line should be commit range, got %q", lines[0])
 	}
+	if len(lines) < 2 {
+		t.Fatalf("expected at least 2 lines (header + blank), got %d lines: %v", len(lines), lines)
+	}
 	// Second line is blank
-	if len(lines) < 2 || lines[1] != "" {
+	if lines[1] != "" {
 		t.Errorf("second line should be blank, got %q", lines[1])
+	}
+	if len(lines) < 3 {
+		t.Fatalf("expected at least 3 lines (including file line), got %d lines: %v", len(lines), lines)
 	}
 	// One file line: R\tnew.go\told.go
 	fileLines := lines[2:]
 	if len(fileLines) != 1 {
-		t.Errorf("expected 1 file line, got %d: %v", len(fileLines), fileLines)
+		t.Fatalf("expected 1 file line, got %d: %v", len(fileLines), fileLines)
 	}
 	if fileLines[0] != "R\tnew.go\told.go" {
 		t.Errorf("expected R\\tnew.go\\told.go, got %q", fileLines[0])
