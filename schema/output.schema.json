@@ -45,7 +45,7 @@
     {
       "if": { "properties": { "status": { "const": "Renamed" } } },
       "then": {
-        "required": ["from", "to"]
+        "required": ["from", "to", "old_path"]
       }
     },
     {
