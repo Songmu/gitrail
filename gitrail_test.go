@@ -103,6 +103,54 @@ func TestRunTextOutput(t *testing.T) {
 	}
 }
 
+func TestRunTextOutputWithRename(t *testing.T) {
+	gm := newTestRepo(t)
+	ctx := context.Background()
+
+	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+		"old.go": "package main\n",
+	})
+	testRenameCommit(t, gm, "2026-02-01T00:00:00Z", "old.go", "new.go", "rename")
+
+	var out bytes.Buffer
+	err := Run(ctx, []string{
+		"-C", gm.RepoPath(),
+		"--since=2026-01-05T00:00:00Z",
+		"--until=2026-03-01T00:00:00Z",
+	}, &out, os.Stderr)
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+
+	got := out.String()
+	lines := strings.Split(strings.TrimRight(got, "\n"), "\n")
+	if len(lines) < 1 {
+		t.Fatalf("expected at least 1 line (commit range header), got %d lines: %v", len(lines), lines)
+	}
+	// First line is commit range header
+	if !strings.Contains(lines[0], "..") {
+		t.Errorf("first line should be commit range, got %q", lines[0])
+	}
+	if len(lines) < 2 {
+		t.Fatalf("expected at least 2 lines (header + blank), got %d lines: %v", len(lines), lines)
+	}
+	// Second line is blank
+	if lines[1] != "" {
+		t.Errorf("second line should be blank, got %q", lines[1])
+	}
+	if len(lines) < 3 {
+		t.Fatalf("expected at least 3 lines (including file line), got %d lines: %v", len(lines), lines)
+	}
+	// One file line: R\tnew.go\told.go
+	fileLines := lines[2:]
+	if len(fileLines) != 1 {
+		t.Fatalf("expected 1 file line, got %d: %v", len(fileLines), fileLines)
+	}
+	if fileLines[0] != "R\tnew.go\told.go" {
+		t.Errorf("expected R\\tnew.go\\told.go, got %q", fileLines[0])
+	}
+}
+
 func TestRunTextOutputNoChanges(t *testing.T) {
 	gm := newTestRepo(t)
 	ctx := context.Background()
@@ -208,6 +256,45 @@ func TestRunJSONOutputWithRename(t *testing.T) {
 		"-C", gm.RepoPath(),
 		"--since=2026-01-05T00:00:00Z",
 		"--until=2026-03-01T00:00:00Z",
+		"--json",
+	}, &out, os.Stderr)
+	if err != nil {
+		t.Fatalf("Run --json: %v", err)
+	}
+
+	got := out.String()
+	lines := strings.Split(strings.TrimRight(got, "\n"), "\n")
+	if len(lines) != 1 {
+		t.Errorf("expected 1 JSON line, got %d: %v", len(lines), lines)
+	}
+	if !strings.Contains(lines[0], `"status":"Renamed"`) {
+		t.Errorf("expected Renamed, got %q", lines[0])
+	}
+	if !strings.Contains(lines[0], `"old_path":"old.go"`) {
+		t.Errorf("expected old_path, got %q", lines[0])
+	}
+	if !strings.Contains(lines[0], `"path":"new.go"`) {
+		t.Errorf("expected path new.go, got %q", lines[0])
+	}
+}
+
+func TestRunJSONOutputWithRenameAndModification(t *testing.T) {
+	gm := newTestRepo(t)
+	ctx := context.Background()
+
+	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+		"old.go": "package main\n",
+	})
+	testCommit(t, gm, "2026-02-01T00:00:00Z", "modify", map[string]string{
+		"old.go": "package main\n\n// updated\n",
+	})
+	testRenameCommit(t, gm, "2026-03-01T00:00:00Z", "old.go", "new.go", "rename")
+
+	var out bytes.Buffer
+	err := Run(ctx, []string{
+		"-C", gm.RepoPath(),
+		"--since=2026-01-05T00:00:00Z",
+		"--until=2026-04-01T00:00:00Z",
 		"--json",
 	}, &out, os.Stderr)
 	if err != nil {

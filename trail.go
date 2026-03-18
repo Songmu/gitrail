@@ -16,8 +16,10 @@ type ChangeStatus string
 const (
 	// Added means the file was added.
 	Added ChangeStatus = "Added"
-	// Modified means the file was modified (or renamed).
+	// Modified means the file was modified. If also renamed, OldPath is set.
 	Modified ChangeStatus = "Modified"
+	// Renamed means the file was renamed with no content change. OldPath is set.
+	Renamed ChangeStatus = "Renamed"
 	// Deleted means the file was deleted.
 	Deleted ChangeStatus = "Deleted"
 )
@@ -26,7 +28,7 @@ const (
 type FileChange struct {
 	Status  ChangeStatus
 	Path    string // path at end commit (or start commit for Deleted)
-	OldPath string // rename source path (only set when renamed)
+	OldPath string // rename source path (only set when Status is Renamed or Modified with rename)
 }
 
 // Result is the output from the Trail method.
@@ -185,7 +187,7 @@ func validateAncestor(ctx context.Context, dir, startCommit, endCommit string, e
 }
 
 func getDiff(ctx context.Context, dir, startCommit, endCommit string, pathspecs []string, errStream io.Writer) ([]FileChange, error) {
-	args := []string{"diff", "--name-status", startCommit, endCommit}
+	args := []string{"diff", "--name-status", "--no-renames", startCommit, endCommit}
 	if len(pathspecs) > 0 {
 		args = append(args, "--")
 		args = append(args, pathspecs...)
@@ -356,8 +358,30 @@ func applyRenameDetection(ctx context.Context, dir, startCommit, endCommit strin
 		}
 		if c.Status == Added {
 			if origin, ok := renameMapping[c.Path]; ok {
+				// Check whether content changed between origin at startCommit and path at endCommit
+				// by comparing their blob object IDs instead of running a full git diff.
+				out, exitCode, err := gitCmdAllowFail(ctx, dir, errStream, "rev-parse", startCommit+":"+origin, endCommit+":"+c.Path)
+				if err != nil {
+					return nil, err
+				}
+				if exitCode != 0 {
+					// Any non-zero exit code indicates a git error; surface it instead of silently
+					// treating this as a content change.
+					return nil, fmt.Errorf("git rev-parse failed with exit code %d for %s -> %s", exitCode, origin, c.Path)
+				}
+				fields := strings.Fields(out)
+				if len(fields) < 2 {
+					return nil, fmt.Errorf("unexpected git rev-parse output for %s -> %s: %q", origin, c.Path, out)
+				}
+				originBlob := fields[0]
+				destBlob := fields[1]
+				status := Modified
+				if originBlob == destBlob {
+					// No content change between origin and current path; treat as a pure rename.
+					status = Renamed
+				}
 				result = append(result, FileChange{
-					Status:  Modified,
+					Status:  status,
 					Path:    c.Path,
 					OldPath: origin,
 				})

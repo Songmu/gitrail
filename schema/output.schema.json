@@ -8,15 +8,15 @@
   "properties": {
     "from": {
       "type": "string",
-      "description": "Start commit hash. Present for Modified and Deleted entries."
+      "description": "Start commit hash. Present for Modified, Renamed, and Deleted entries."
     },
     "to": {
       "type": "string",
-      "description": "End commit hash. Present for Added and Modified entries."
+      "description": "End commit hash. Present for Added, Modified, and Renamed entries."
     },
     "status": {
       "type": "string",
-      "enum": ["Added", "Modified", "Deleted"],
+      "enum": ["Added", "Modified", "Renamed", "Deleted"],
       "description": "Type of file change."
     },
     "path": {
@@ -40,6 +40,12 @@
       "if": { "properties": { "status": { "const": "Modified" } } },
       "then": {
         "required": ["from", "to"]
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "Renamed" } } },
+      "then": {
+        "required": ["from", "to", "old_path"]
       }
     },
     {

@@ -172,9 +172,6 @@ func TestTrailBasic(t *testing.T) {
 				testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
 					"old.go": "package main\n",
 				})
-				testCommit(t, gm, "2026-02-01T00:00:00Z", "modify", map[string]string{
-					"old.go": "package main\n\n// updated\n",
-				})
 				testRenameCommit(t, gm, "2026-03-01T00:00:00Z", "old.go", "new.go", "rename")
 			},
 			opts: trailOpts{
@@ -182,7 +179,7 @@ func TestTrailBasic(t *testing.T) {
 				Until: "2026-04-01T00:00:00Z",
 			},
 			want: []FileChange{
-				{Status: Modified, Path: "new.go", OldPath: "old.go"},
+				{Status: Renamed, Path: "new.go", OldPath: "old.go"},
 			},
 		},
 		{
@@ -199,7 +196,26 @@ func TestTrailBasic(t *testing.T) {
 				Until: "2026-04-01T00:00:00Z",
 			},
 			want: []FileChange{
-				{Status: Modified, Path: "c.go", OldPath: "a.go"},
+				{Status: Renamed, Path: "c.go", OldPath: "a.go"},
+			},
+		},
+		{
+			name: "rename_with_modification",
+			setup: func(t *testing.T, gm *gitmock.GitMock) {
+				testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+					"old.go": "package main\n",
+				})
+				testCommit(t, gm, "2026-02-01T00:00:00Z", "modify", map[string]string{
+					"old.go": "package main\n\n// updated\n",
+				})
+				testRenameCommit(t, gm, "2026-03-01T00:00:00Z", "old.go", "new.go", "rename")
+			},
+			opts: trailOpts{
+				Since: "2026-01-05T00:00:00Z",
+				Until: "2026-04-01T00:00:00Z",
+			},
+			want: []FileChange{
+				{Status: Modified, Path: "new.go", OldPath: "old.go"},
 			},
 		},
 		{

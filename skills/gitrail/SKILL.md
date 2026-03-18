@@ -52,6 +52,7 @@ Each line of output is a JSON object describing one changed file:
 {"to":"def456","status":"Added","path":"src/new.go"}
 {"from":"abc123","to":"def456","status":"Modified","path":"src/foo.go"}
 {"from":"abc123","to":"def456","status":"Modified","path":"src/bar.go","old_path":"src/old_bar.go"}
+{"from":"abc123","to":"def456","status":"Renamed","path":"src/baz.go","old_path":"src/old_baz.go"}
 {"from":"abc123","status":"Deleted","path":"src/removed.go"}
 ```
 
@@ -67,15 +68,15 @@ Each line of output is a JSON object describing one changed file:
   "properties": {
     "from": {
       "type": "string",
-      "description": "Start commit hash. Present for Modified and Deleted entries."
+      "description": "Start commit hash. Present for Modified, Renamed, and Deleted entries."
     },
     "to": {
       "type": "string",
-      "description": "End commit hash. Present for Added and Modified entries."
+      "description": "End commit hash. Present for Added, Modified, and Renamed entries."
     },
     "status": {
       "type": "string",
-      "enum": ["Added", "Modified", "Deleted"],
+      "enum": ["Added", "Modified", "Renamed", "Deleted"],
       "description": "Type of file change."
     },
     "path": {
@@ -94,7 +95,11 @@ Each line of output is a JSON object describing one changed file:
     },
     {
       "if": { "properties": { "status": { "const": "Modified" } } },
-      "then": { "required": ["from", "to"] }
+      "then": { "required": ["from", "to"], "properties": { "old_path": false } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "Renamed" } } },
+      "then": { "required": ["from", "to", "old_path"] }
     },
     {
       "if": { "properties": { "status": { "const": "Deleted" } } },
