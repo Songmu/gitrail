@@ -364,8 +364,16 @@ func applyRenameDetection(ctx context.Context, dir, startCommit, endCommit strin
 					return nil, err
 				}
 				status := Modified
-				if exitCode == 0 {
+				switch exitCode {
+				case 0:
+					// No content change between origin and current path; treat as a pure rename.
 					status = Renamed
+				case 1:
+					// Content differs; keep status as Modified.
+				default:
+					// Any other exit code indicates a git error; surface it instead of silently
+					// treating this as a content change.
+					return nil, fmt.Errorf("git diff --quiet failed with exit code %d for %s -> %s", exitCode, origin, c.Path)
 				}
 				result = append(result, FileChange{
 					Status:  status,
