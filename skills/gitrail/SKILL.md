@@ -95,11 +95,11 @@ Each line of output is a JSON object describing one changed file:
     },
     {
       "if": { "properties": { "status": { "const": "Modified" } } },
-      "then": { "required": ["from", "to"] }
+      "then": { "required": ["from", "to"], "properties": { "old_path": false } }
     },
     {
       "if": { "properties": { "status": { "const": "Renamed" } } },
-      "then": { "required": ["from", "to"] }
+      "then": { "required": ["from", "to", "old_path"] }
     },
     {
       "if": { "properties": { "status": { "const": "Deleted" } } },
