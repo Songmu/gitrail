@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	github.com/Songmu/gitmock v0.0.2
-	github.com/Songmu/skillsmith v0.0.1
+	github.com/Songmu/skillsmith v0.0.2
 )
 
 require (
