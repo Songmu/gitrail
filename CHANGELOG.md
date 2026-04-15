@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.0.5](https://github.com/Songmu/gitrail/compare/v0.0.4...v0.0.5) - 2026-04-15
+- fix ghr by @Songmu in https://github.com/Songmu/gitrail/pull/21
+
 ## [v0.0.4](https://github.com/Songmu/gitrail/compare/v0.0.3...v0.0.4) - 2026-04-15
 - Bump Songmu/tagpr from 1.17.1 to 1.18.1 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/18
 - Bump actions/setup-go from 6.3.0 to 6.4.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/17
