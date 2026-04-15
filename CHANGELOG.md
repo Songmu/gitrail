@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.0.6](https://github.com/Songmu/gitrail/compare/v0.0.5...v0.0.6) - 2026-04-15
+- udpate ghr by @Songmu in https://github.com/Songmu/gitrail/pull/23
+
 ## [v0.0.5](https://github.com/Songmu/gitrail/compare/v0.0.4...v0.0.5) - 2026-04-15
 - fix ghr by @Songmu in https://github.com/Songmu/gitrail/pull/21
 
