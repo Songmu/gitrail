@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.0.4](https://github.com/Songmu/gitrail/compare/v0.0.3...v0.0.4) - 2026-04-15
+- Bump Songmu/tagpr from 1.17.1 to 1.18.1 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/18
+- Bump actions/setup-go from 6.3.0 to 6.4.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/17
+- introduce ghr actions by @Songmu in https://github.com/Songmu/gitrail/pull/20
+- Bump github.com/Songmu/skillsmith from 0.0.1 to 0.1.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/15
+
 ## [v0.0.3](https://github.com/Songmu/gitrail/compare/v0.0.2...v0.0.3) - 2026-03-18
 - Add Renamed status for pure renames by @Songmu in https://github.com/Songmu/gitrail/pull/10
 
