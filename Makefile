@@ -32,7 +32,7 @@ release: devel-deps
 CREDITS: go.sum deps devel-deps
 	godzil credits -w
 
-DIST_DIR = dist/v$(VERSION)
+DIST_DIR = dist
 .PHONY: crossbuild
 crossbuild: CREDITS
 	rm -rf $(DIST_DIR)
@@ -42,4 +42,4 @@ crossbuild: CREDITS
 
 .PHONY: upload
 upload:
-	ghr -body="$$(godzil changelog --latest -F markdown)" v$(VERSION) dist/v$(VERSION)
+	ghr v$(VERSION) dist
