@@ -1,9 +1,19 @@
 ---
 name: gitrail
 description: >
-  CLI that tracks file changes (added, modified, deleted, renamed)
-  over a time period in a Git repository, with rename chain detection.
-  Keywords: git, diff, file changes, rename tracking.
+  Use this skill whenever the user asks what files changed during a historical
+  time window in a Git repository. Choose gitrail for date-based or
+  relative-time investigations, release/compliance audits, and
+  repository-structure change reports that need a reproducible file inventory
+  rather than a commit list or patch. It identifies Added, Modified, Deleted,
+  and Renamed files, including edited renames and multi-step rename histories
+  with original and final paths. Use it when results must be scoped to a branch
+  or revision, filtered by directories, path patterns, extensions, or
+  exclusions such as vendor/generated files, or emitted as counts or
+  machine-readable JSON/NDJSON. Also recognize equivalent non-English requests
+  for files added, updated, deleted, or renamed over a period. Do not use for
+  author/commit-message summaries, changelogs, line-level diffs, comparing
+  current branch contents, schema validation, or filesystem watching.
 license: MIT
 compatibility: Claude, Codex, and agent environments
 allowed-tools:
