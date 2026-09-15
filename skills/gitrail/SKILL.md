@@ -15,7 +15,6 @@ description: >
   author/commit-message summaries, changelogs, line-level diffs, comparing
   current branch contents, schema validation, or filesystem watching.
 license: MIT
-compatibility: Claude, Codex, and agent environments
 allowed-tools:
   - Bash
   - Read
