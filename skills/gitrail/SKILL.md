@@ -1,14 +1,20 @@
 ---
 name: gitrail
 description: >
-  CLI that tracks file changes (added, modified, deleted, renamed)
-  over a time period in a Git repository, with rename chain detection.
-  Keywords: git, diff, file changes, rename tracking.
+  Use this skill whenever the user asks what files changed during a historical
+  time window in a Git repository. Choose gitrail for date-based or
+  relative-time investigations, release/compliance audits, and
+  repository-structure change reports that need a reproducible file inventory
+  rather than a commit list or patch. It identifies Added, Modified, Deleted,
+  and Renamed files, including edited renames and multi-step rename histories
+  with original and final paths. Use it when results must be scoped to a branch
+  or revision, filtered by directories, path patterns, extensions, or
+  exclusions such as vendor/generated files, or emitted as counts or
+  machine-readable JSON/NDJSON. Also recognize equivalent non-English requests
+  for files added, updated, deleted, or renamed over a period. Do not use for
+  author/commit-message summaries, changelogs, line-level diffs, comparing
+  current branch contents, schema validation, or filesystem watching.
 license: MIT
-compatibility:
-  - claude
-  - codex
-  - agents
 allowed-tools:
   - Bash
   - Read
@@ -58,57 +64,9 @@ Each line of output is a JSON object describing one changed file:
 
 ### JSON Schema
 
-```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "gitrail NDJSON output",
-  "description": "Schema for each line of gitrail --json output. One JSON object per changed file.",
-  "type": "object",
-  "required": ["status", "path"],
-  "properties": {
-    "from": {
-      "type": "string",
-      "description": "Start commit hash. Present for Modified, Renamed, and Deleted entries."
-    },
-    "to": {
-      "type": "string",
-      "description": "End commit hash. Present for Added, Modified, and Renamed entries."
-    },
-    "status": {
-      "type": "string",
-      "enum": ["Added", "Modified", "Renamed", "Deleted"],
-      "description": "Type of file change."
-    },
-    "path": {
-      "type": "string",
-      "description": "File path at the end commit. For Deleted entries, the path at the start commit."
-    },
-    "old_path": {
-      "type": "string",
-      "description": "Original file path before rename. Only present when the file was renamed."
-    }
-  },
-  "allOf": [
-    {
-      "if": { "properties": { "status": { "const": "Added" } } },
-      "then": { "required": ["to"], "properties": { "from": false, "old_path": false } }
-    },
-    {
-      "if": { "properties": { "status": { "const": "Modified" } } },
-      "then": { "required": ["from", "to"], "properties": { "old_path": false } }
-    },
-    {
-      "if": { "properties": { "status": { "const": "Renamed" } } },
-      "then": { "required": ["from", "to", "old_path"] }
-    },
-    {
-      "if": { "properties": { "status": { "const": "Deleted" } } },
-      "then": { "required": ["from"], "properties": { "to": false, "old_path": false } }
-    }
-  ],
-  "additionalProperties": false
-}
-```
+The schema for each NDJSON line is bundled at
+[`assets/output.schema.json`](assets/output.schema.json). Read that file when
+validating or interpreting `--json` output.
 
 ## Exit Codes
 
@@ -139,4 +97,3 @@ gitrail --json --since="2026-01-01" --until="2026-03-01" -- '*.go' ':!*_gen.go'
 ```bash
 gitrail --json --since="2026-01-01" --until="2026-03-01" | jq 'select(.status=="Added")'
 ```
-
