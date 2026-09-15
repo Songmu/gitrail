@@ -9,7 +9,7 @@ compatibility:
   - claude
   - codex
   - agents
-allowed_tools:
+allowed-tools:
   - Bash
   - Read
 ---
