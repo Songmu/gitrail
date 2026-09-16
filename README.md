@@ -35,6 +35,8 @@ R	src/baz.go	src/old_baz.go
 | `-C` | current directory | Path to git repository |
 | `--branch` | HEAD | Target branch or revision |
 | `--json` | false | NDJSON output |
+| `--jq` | none | Filter each JSON change with a jq expression |
+| `-r` | false | Output raw strings with `--jq` |
 | `-- pathspec...` | none | Git pathspec filters (e.g. `'*.go'`, `':!vendor/'`) |
 
 Time formats are passed directly to git — ISO 8601 (`2026-01-01`), relative dates (`"1 month ago"`), etc. are all supported.
@@ -65,6 +67,19 @@ With `--json`, each line is a self-contained JSON object:
 ```
 
 The JSON schema is available at [`schema/output.schema.json`](schema/output.schema.json).
+
+### jq Filtering
+
+Use `--jq` to filter each change as JSON. `--jq` works with or without `--json` and takes precedence when both are set. Use `-r` to write string results without JSON quoting; non-string results remain JSON encoded, as with jq. A jq evaluation error stops processing and returns an error.
+
+```console
+% gitrail --since="2026-01-01" --until="2026-03-01" --jq '.path' -r
+src/new.go
+src/foo.go
+src/bar.go
+src/baz.go
+src/removed.go
+```
 
 ### Exit Codes
 

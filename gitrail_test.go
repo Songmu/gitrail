@@ -3,9 +3,12 @@ package gitrail
 import (
 	"bytes"
 	"context"
+	"io"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/itchyny/gojq"
 )
 
 func TestRunSkillsList(t *testing.T) {
@@ -339,6 +342,169 @@ func TestRunJSONOutputNoChanges(t *testing.T) {
 	// No changes → no NDJSON output
 	if out.Len() != 0 {
 		t.Errorf("expected empty output for no changes, got %q", out.String())
+	}
+}
+
+func TestRunJQOutput(t *testing.T) {
+	gm := newTestRepo(t)
+	ctx := context.Background()
+
+	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+		"foo.go": "package main\n",
+	})
+	testCommit(t, gm, "2026-02-10T00:00:00Z", "add file", map[string]string{
+		"bar.go": "package main\n",
+	})
+
+	var out bytes.Buffer
+	err := Run(ctx, []string{
+		"-C", gm.RepoPath(),
+		"--since=2026-01-15T00:00:00Z",
+		"--until=2026-03-01T00:00:00Z",
+		"--jq={path: .path, status: .status}",
+		"--json",
+	}, &out, os.Stderr)
+	if err != nil {
+		t.Fatalf("Run --jq: %v", err)
+	}
+	if got, want := out.String(), "{\"path\":\"bar.go\",\"status\":\"Added\"}\n"; got != want {
+		t.Errorf("Run --jq output = %q, want %q", got, want)
+	}
+}
+
+func TestRunJQRawOutput(t *testing.T) {
+	gm := newTestRepo(t)
+	ctx := context.Background()
+
+	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+		"foo.go": "package main\n",
+	})
+	testCommit(t, gm, "2026-02-10T00:00:00Z", "add file", map[string]string{
+		"bar.go": "package main\n",
+	})
+
+	var out bytes.Buffer
+	err := Run(ctx, []string{
+		"-C", gm.RepoPath(),
+		"--since=2026-01-15T00:00:00Z",
+		"--until=2026-03-01T00:00:00Z",
+		"--jq=.path",
+		"-r",
+	}, &out, os.Stderr)
+	if err != nil {
+		t.Fatalf("Run --jq -r: %v", err)
+	}
+	if got, want := out.String(), "bar.go\n"; got != want {
+		t.Errorf("Run --jq -r output = %q, want %q", got, want)
+	}
+
+	out.Reset()
+	err = Run(ctx, []string{
+		"-C", gm.RepoPath(),
+		"--since=2026-01-15T00:00:00Z",
+		"--until=2026-03-01T00:00:00Z",
+		"--jq=[.path]",
+		"-r",
+	}, &out, os.Stderr)
+	if err != nil {
+		t.Fatalf("Run --jq -r with non-string result: %v", err)
+	}
+	if got, want := out.String(), "[\"bar.go\"]\n"; got != want {
+		t.Errorf("Run --jq -r with non-string result output = %q, want %q", got, want)
+	}
+}
+
+func TestRunRawOutputRequiresJQ(t *testing.T) {
+	var out, errOut bytes.Buffer
+	err := Run(context.Background(), []string{
+		"--since=2026-01-01",
+		"--until=2026-03-01",
+		"-r",
+	}, &out, &errOut)
+	if err == nil || err.Error() != "-r requires --jq" {
+		t.Errorf("Run -r error = %v, want %q", err, "-r requires --jq")
+	}
+}
+
+func TestRunInvalidJQExpression(t *testing.T) {
+	tests := []struct {
+		name    string
+		args    []string
+		wantErr string
+	}{
+		{
+			name:    "invalid expression",
+			args:    []string{"--jq=.["},
+			wantErr: "parse --jq expression",
+		},
+		{
+			name:    "empty expression",
+			args:    []string{"--jq="},
+			wantErr: "--jq expression must not be empty",
+		},
+		{
+			name:    "empty expression with raw output",
+			args:    []string{"--jq=", "-r"},
+			wantErr: "--jq expression must not be empty",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var out, errOut bytes.Buffer
+			args := make([]string, 0, 2+len(tt.args))
+			args = append(args,
+				"--since=2026-01-01",
+				"--until=2026-03-01",
+			)
+			args = append(args, tt.args...)
+			err := Run(context.Background(), args, &out, &errOut)
+			if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+				t.Errorf("Run invalid --jq error = %v, want %q", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestRunJQRuntimeError(t *testing.T) {
+	gm := newTestRepo(t)
+	ctx := context.Background()
+
+	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+		"foo.go": "package main\n",
+	})
+	testCommit(t, gm, "2026-02-10T00:00:00Z", "add file", map[string]string{
+		"bar.go": "package main\n",
+	})
+
+	var out bytes.Buffer
+	err := Run(ctx, []string{
+		"-C", gm.RepoPath(),
+		"--since=2026-01-15T00:00:00Z",
+		"--until=2026-03-01T00:00:00Z",
+		"--jq=error(\"failed\")",
+	}, &out, os.Stderr)
+	if err == nil || !strings.Contains(err.Error(), "run --jq expression") {
+		t.Errorf("Run failing --jq error = %v, want runtime error", err)
+	}
+}
+
+func TestOutputJQHonorsContextCancellation(t *testing.T) {
+	query, err := gojq.Parse("repeat(1)")
+	if err != nil {
+		t.Fatalf("Parse jq expression: %v", err)
+	}
+	code, err := gojq.Compile(query)
+	if err != nil {
+		t.Fatalf("Compile jq expression: %v", err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	err = outputJQ(ctx, io.Discard, &Result{
+		Changes: []FileChange{{Status: Added, Path: "foo.go"}},
+	}, code, false)
+	if err == nil || !strings.Contains(err.Error(), "context canceled") {
+		t.Errorf("outputJQ error = %v, want context cancellation", err)
 	}
 }
 
