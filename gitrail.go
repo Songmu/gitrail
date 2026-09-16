@@ -159,7 +159,11 @@ func outputJSON(out io.Writer, result *Result) error {
 
 func outputJQ(out io.Writer, result *Result, code *gojq.Code, raw bool) error {
 	for _, c := range result.Changes {
-		iter := code.Run(newJSONFileChange(result, c).value())
+		value, err := newJSONFileChange(result, c).value()
+		if err != nil {
+			return err
+		}
+		iter := code.Run(value)
 		for {
 			value, ok := iter.Next()
 			if !ok {
@@ -210,19 +214,14 @@ func newJSONFileChange(result *Result, c FileChange) jsonFileChange {
 	return jc
 }
 
-func (c jsonFileChange) value() map[string]any {
-	value := map[string]any{
-		"status": c.Status,
-		"path":   c.Path,
+func (c jsonFileChange) value() (map[string]any, error) {
+	b, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
 	}
-	if c.From != "" {
-		value["from"] = c.From
+	var value map[string]any
+	if err := json.Unmarshal(b, &value); err != nil {
+		return nil, err
 	}
-	if c.To != "" {
-		value["to"] = c.To
-	}
-	if c.OldPath != "" {
-		value["old_path"] = c.OldPath
-	}
-	return value
+	return value, nil
 }
