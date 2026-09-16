@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.0.7](https://github.com/Songmu/gitrail/compare/v0.0.6...v0.0.7) - 2026-09-16
+
+- Bump reviewdog/action-staticcheck from 1.28.0 to 1.29.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/33
+- Bump actions/setup-go from 6.4.0 to 6.5.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/32
+- Bump Songmu/tagpr from 1.18.2 to 1.20.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/28
+- Bump actions/checkout from 6.0.2 to 7.0.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/31
+- Bump codecov/codecov-action from 6.0.0 to 7.0.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/30
+- Improve gitrail skill metadata and schema packaging by @Songmu in https://github.com/Songmu/gitrail/pull/35
+- Add gojq-backed jq output filtering by @Songmu with @Copilot in https://github.com/Songmu/gitrail/pull/36
+
 ## [v0.0.6](https://github.com/Songmu/gitrail/compare/v0.0.5...v0.0.6) - 2026-04-15
 - udpate ghr by @Songmu in https://github.com/Songmu/gitrail/pull/23
 
