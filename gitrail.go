@@ -188,13 +188,7 @@ func newJSONFileChange(result *Result, c FileChange) map[string]any {
 	switch c.Status {
 	case Added:
 		value["to"] = result.To
-	case Modified:
-		value["from"] = result.From
-		value["to"] = result.To
-		if c.OldPath != "" {
-			value["old_path"] = c.OldPath
-		}
-	case Renamed:
+	case Modified, Renamed:
 		value["from"] = result.From
 		value["to"] = result.To
 		if c.OldPath != "" {
