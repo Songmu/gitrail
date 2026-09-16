@@ -76,6 +76,7 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 	var jqCode *gojq.Code
 	if jqSet {
 		if *jqFilter == "" {
+			fs.Usage()
 			return fmt.Errorf("--jq expression must not be empty")
 		}
 		query, err := gojq.Parse(*jqFilter)
