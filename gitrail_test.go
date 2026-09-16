@@ -359,6 +359,7 @@ func TestRunJQOutput(t *testing.T) {
 		"--since=2026-01-15T00:00:00Z",
 		"--until=2026-03-01T00:00:00Z",
 		"--jq={path: .path, status: .status}",
+		"--json",
 	}, &out, os.Stderr)
 	if err != nil {
 		t.Fatalf("Run --jq: %v", err)

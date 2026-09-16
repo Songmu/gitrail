@@ -86,11 +86,11 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		return err
 	}
 
-	if *jsonOut {
-		return outputJSON(outStream, result)
-	}
 	if jqCode != nil {
 		return outputJQ(outStream, result, jqCode, *rawOutput)
+	}
+	if *jsonOut {
+		return outputJSON(outStream, result)
 	}
 	return outputText(outStream, result)
 }
