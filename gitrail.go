@@ -10,6 +10,7 @@ import (
 	"log"
 
 	"github.com/Songmu/skillsmith"
+	"github.com/itchyny/gojq"
 )
 
 //go:embed skills
@@ -45,6 +46,8 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 	dir := fs.String("C", "", "path to git repository (default: current directory)")
 	branch := fs.String("branch", "", "target branch or revision (default: HEAD)")
 	jsonOut := fs.Bool("json", false, "output as NDJSON")
+	jqFilter := fs.String("jq", "", "filter JSON output using a jq expression")
+	rawOutput := fs.Bool("r", false, "output raw strings with --jq")
 	if err := fs.Parse(argv); err != nil {
 		return err
 	}
@@ -60,6 +63,18 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		return fmt.Errorf("--until is required")
 	}
 
+	var jqCode *gojq.Code
+	if *jqFilter != "" {
+		query, err := gojq.Parse(*jqFilter)
+		if err != nil {
+			return fmt.Errorf("parse --jq expression: %w", err)
+		}
+		jqCode, err = gojq.Compile(query)
+		if err != nil {
+			return fmt.Errorf("compile --jq expression: %w", err)
+		}
+	}
+
 	result, err := trail(ctx, &trailOpts{
 		Dir:       *dir,
 		Since:     *since,
@@ -73,6 +88,9 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 
 	if *jsonOut {
 		return outputJSON(outStream, result)
+	}
+	if jqCode != nil {
+		return outputJQ(outStream, result, jqCode, *rawOutput)
 	}
 	return outputText(outStream, result)
 }
@@ -127,27 +145,80 @@ type jsonFileChange struct {
 func outputJSON(out io.Writer, result *Result) error {
 	enc := json.NewEncoder(out)
 	for _, c := range result.Changes {
-		jc := jsonFileChange{
-			Status: string(c.Status),
-			Path:   c.Path,
-		}
-		switch c.Status {
-		case Added:
-			jc.To = result.To
-		case Modified:
-			jc.From = result.From
-			jc.To = result.To
-			jc.OldPath = c.OldPath
-		case Renamed:
-			jc.From = result.From
-			jc.To = result.To
-			jc.OldPath = c.OldPath
-		case Deleted:
-			jc.From = result.From
-		}
+		jc := newJSONFileChange(result, c)
 		if err := enc.Encode(jc); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func outputJQ(out io.Writer, result *Result, code *gojq.Code, raw bool) error {
+	for _, c := range result.Changes {
+		iter := code.Run(newJSONFileChange(result, c).value())
+		for {
+			value, ok := iter.Next()
+			if !ok {
+				break
+			}
+			if err, ok := value.(error); ok {
+				return fmt.Errorf("run --jq expression: %w", err)
+			}
+			if raw {
+				if s, ok := value.(string); ok {
+					if _, err := fmt.Fprintln(out, s); err != nil {
+						return err
+					}
+					continue
+				}
+			}
+			b, err := gojq.Marshal(value)
+			if err != nil {
+				return err
+			}
+			if _, err := fmt.Fprintln(out, string(b)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func newJSONFileChange(result *Result, c FileChange) jsonFileChange {
+	jc := jsonFileChange{
+		Status: string(c.Status),
+		Path:   c.Path,
+	}
+	switch c.Status {
+	case Added:
+		jc.To = result.To
+	case Modified:
+		jc.From = result.From
+		jc.To = result.To
+		jc.OldPath = c.OldPath
+	case Renamed:
+		jc.From = result.From
+		jc.To = result.To
+		jc.OldPath = c.OldPath
+	case Deleted:
+		jc.From = result.From
+	}
+	return jc
+}
+
+func (c jsonFileChange) value() map[string]any {
+	value := map[string]any{
+		"status": c.Status,
+		"path":   c.Path,
+	}
+	if c.From != "" {
+		value["from"] = c.From
+	}
+	if c.To != "" {
+		value["to"] = c.To
+	}
+	if c.OldPath != "" {
+		value["old_path"] = c.OldPath
+	}
+	return value
 }

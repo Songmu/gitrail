@@ -342,6 +342,59 @@ func TestRunJSONOutputNoChanges(t *testing.T) {
 	}
 }
 
+func TestRunJQOutput(t *testing.T) {
+	gm := newTestRepo(t)
+	ctx := context.Background()
+
+	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+		"foo.go": "package main\n",
+	})
+	testCommit(t, gm, "2026-02-10T00:00:00Z", "add file", map[string]string{
+		"bar.go": "package main\n",
+	})
+
+	var out bytes.Buffer
+	err := Run(ctx, []string{
+		"-C", gm.RepoPath(),
+		"--since=2026-01-15T00:00:00Z",
+		"--until=2026-03-01T00:00:00Z",
+		"--jq={path: .path, status: .status}",
+	}, &out, os.Stderr)
+	if err != nil {
+		t.Fatalf("Run --jq: %v", err)
+	}
+	if got, want := out.String(), "{\"path\":\"bar.go\",\"status\":\"Added\"}\n"; got != want {
+		t.Errorf("Run --jq output = %q, want %q", got, want)
+	}
+}
+
+func TestRunJQRawOutput(t *testing.T) {
+	gm := newTestRepo(t)
+	ctx := context.Background()
+
+	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+		"foo.go": "package main\n",
+	})
+	testCommit(t, gm, "2026-02-10T00:00:00Z", "add file", map[string]string{
+		"bar.go": "package main\n",
+	})
+
+	var out bytes.Buffer
+	err := Run(ctx, []string{
+		"-C", gm.RepoPath(),
+		"--since=2026-01-15T00:00:00Z",
+		"--until=2026-03-01T00:00:00Z",
+		"--jq=.path",
+		"-r",
+	}, &out, os.Stderr)
+	if err != nil {
+		t.Fatalf("Run --jq -r: %v", err)
+	}
+	if got, want := out.String(), "bar.go\n"; got != want {
+		t.Errorf("Run --jq -r output = %q, want %q", got, want)
+	}
+}
+
 func TestRunExitCode2(t *testing.T) {
 	gm := newTestRepo(t)
 	ctx := context.Background()
