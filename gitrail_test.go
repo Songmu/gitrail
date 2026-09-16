@@ -396,6 +396,18 @@ func TestRunJQRawOutput(t *testing.T) {
 	}
 }
 
+func TestRunRawOutputRequiresJQ(t *testing.T) {
+	var out, errOut bytes.Buffer
+	err := Run(context.Background(), []string{
+		"--since=2026-01-01",
+		"--until=2026-03-01",
+		"-r",
+	}, &out, &errOut)
+	if err == nil || err.Error() != "-r requires --jq" {
+		t.Errorf("Run -r error = %v, want %q", err, "-r requires --jq")
+	}
+}
+
 func TestRunExitCode2(t *testing.T) {
 	gm := newTestRepo(t)
 	ctx := context.Background()

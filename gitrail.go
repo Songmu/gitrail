@@ -62,6 +62,10 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		fs.Usage()
 		return fmt.Errorf("--until is required")
 	}
+	if *rawOutput && *jqFilter == "" {
+		fs.Usage()
+		return fmt.Errorf("-r requires --jq")
+	}
 
 	var jqCode *gojq.Code
 	if *jqFilter != "" {
