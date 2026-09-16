@@ -70,7 +70,7 @@ The JSON schema is available at [`schema/output.schema.json`](schema/output.sche
 
 ### jq Filtering
 
-Use `--jq` to filter each change as JSON. `--jq` works with or without `--json` and takes precedence when both are set. Use `-r` to write string results without JSON quoting.
+Use `--jq` to filter each change as JSON. `--jq` works with or without `--json` and takes precedence when both are set. Use `-r` to write string results without JSON quoting; non-string results remain JSON encoded, as with jq.
 
 ```console
 % gitrail --since="2026-01-01" --until="2026-03-01" --jq '.path' -r

@@ -138,14 +138,6 @@ func outputText(out io.Writer, result *Result) error {
 	return nil
 }
 
-type jsonFileChange struct {
-	From    string `json:"from,omitempty"`
-	To      string `json:"to,omitempty"`
-	Status  string `json:"status"`
-	Path    string `json:"path"`
-	OldPath string `json:"old_path,omitempty"`
-}
-
 func outputJSON(out io.Writer, result *Result) error {
 	enc := json.NewEncoder(out)
 	for _, c := range result.Changes {
@@ -159,11 +151,7 @@ func outputJSON(out io.Writer, result *Result) error {
 
 func outputJQ(out io.Writer, result *Result, code *gojq.Code, raw bool) error {
 	for _, c := range result.Changes {
-		value, err := newJSONFileChange(result, c).value()
-		if err != nil {
-			return err
-		}
-		iter := code.Run(value)
+		iter := code.Run(newJSONFileChange(result, c))
 		for {
 			value, ok := iter.Next()
 			if !ok {
@@ -192,36 +180,26 @@ func outputJQ(out io.Writer, result *Result, code *gojq.Code, raw bool) error {
 	return nil
 }
 
-func newJSONFileChange(result *Result, c FileChange) jsonFileChange {
-	jc := jsonFileChange{
-		Status: string(c.Status),
-		Path:   c.Path,
+func newJSONFileChange(result *Result, c FileChange) map[string]any {
+	value := map[string]any{
+		"status": string(c.Status),
+		"path":   c.Path,
 	}
 	switch c.Status {
 	case Added:
-		jc.To = result.To
+		value["to"] = result.To
 	case Modified:
-		jc.From = result.From
-		jc.To = result.To
-		jc.OldPath = c.OldPath
+		value["from"] = result.From
+		value["to"] = result.To
+		if c.OldPath != "" {
+			value["old_path"] = c.OldPath
+		}
 	case Renamed:
-		jc.From = result.From
-		jc.To = result.To
-		jc.OldPath = c.OldPath
+		value["from"] = result.From
+		value["to"] = result.To
+		value["old_path"] = c.OldPath
 	case Deleted:
-		jc.From = result.From
+		value["from"] = result.From
 	}
-	return jc
-}
-
-func (c jsonFileChange) value() (map[string]any, error) {
-	b, err := json.Marshal(c)
-	if err != nil {
-		return nil, err
-	}
-	var value map[string]any
-	if err := json.Unmarshal(b, &value); err != nil {
-		return nil, err
-	}
-	return value, nil
+	return value
 }
