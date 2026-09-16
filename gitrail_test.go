@@ -428,20 +428,24 @@ func TestRunRawOutputRequiresJQ(t *testing.T) {
 
 func TestRunInvalidJQExpression(t *testing.T) {
 	tests := []struct {
-		name string
-		args []string
+		name    string
+		args    []string
+		wantErr string
 	}{
 		{
-			name: "invalid expression",
-			args: []string{"--jq=.["},
+			name:    "invalid expression",
+			args:    []string{"--jq=.["},
+			wantErr: "parse --jq expression",
 		},
 		{
-			name: "empty expression",
-			args: []string{"--jq="},
+			name:    "empty expression",
+			args:    []string{"--jq="},
+			wantErr: "--jq expression must not be empty",
 		},
 		{
-			name: "empty expression with raw output",
-			args: []string{"--jq=", "-r"},
+			name:    "empty expression with raw output",
+			args:    []string{"--jq=", "-r"},
+			wantErr: "--jq expression must not be empty",
 		},
 	}
 	for _, tt := range tests {
@@ -454,8 +458,8 @@ func TestRunInvalidJQExpression(t *testing.T) {
 			)
 			args = append(args, tt.args...)
 			err := Run(context.Background(), args, &out, &errOut)
-			if err == nil || !strings.Contains(err.Error(), "parse --jq expression") {
-				t.Errorf("Run invalid --jq error = %v, want parse error", err)
+			if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+				t.Errorf("Run invalid --jq error = %v, want %q", err, tt.wantErr)
 			}
 		})
 	}
