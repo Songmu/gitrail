@@ -397,6 +397,21 @@ func TestRunJQRawOutput(t *testing.T) {
 	if got, want := out.String(), "bar.go\n"; got != want {
 		t.Errorf("Run --jq -r output = %q, want %q", got, want)
 	}
+
+	out.Reset()
+	err = Run(ctx, []string{
+		"-C", gm.RepoPath(),
+		"--since=2026-01-15T00:00:00Z",
+		"--until=2026-03-01T00:00:00Z",
+		"--jq=.path | length",
+		"-r",
+	}, &out, os.Stderr)
+	if err != nil {
+		t.Fatalf("Run --jq -r with non-string result: %v", err)
+	}
+	if got, want := out.String(), "6\n"; got != want {
+		t.Errorf("Run --jq -r with non-string result output = %q, want %q", got, want)
+	}
 }
 
 func TestRunRawOutputRequiresJQ(t *testing.T) {
@@ -412,14 +427,35 @@ func TestRunRawOutputRequiresJQ(t *testing.T) {
 }
 
 func TestRunInvalidJQExpression(t *testing.T) {
-	var out, errOut bytes.Buffer
-	err := Run(context.Background(), []string{
-		"--since=2026-01-01",
-		"--until=2026-03-01",
-		"--jq=.[",
-	}, &out, &errOut)
-	if err == nil || !strings.Contains(err.Error(), "parse --jq expression") {
-		t.Errorf("Run invalid --jq error = %v, want parse error", err)
+	tests := []struct {
+		name string
+		args []string
+	}{
+		{
+			name: "invalid expression",
+			args: []string{"--jq=.["},
+		},
+		{
+			name: "empty expression",
+			args: []string{"--jq="},
+		},
+		{
+			name: "empty expression with raw output",
+			args: []string{"--jq=", "-r"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var out, errOut bytes.Buffer
+			args := append([]string{
+				"--since=2026-01-01",
+				"--until=2026-03-01",
+			}, tt.args...)
+			err := Run(context.Background(), args, &out, &errOut)
+			if err == nil || !strings.Contains(err.Error(), "parse --jq expression") {
+				t.Errorf("Run invalid --jq error = %v, want parse error", err)
+			}
+		})
 	}
 }
 

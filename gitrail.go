@@ -51,6 +51,12 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 	if err := fs.Parse(argv); err != nil {
 		return err
 	}
+	jqSet := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == "jq" {
+			jqSet = true
+		}
+	})
 	if *ver {
 		return printVersion(outStream)
 	}
@@ -62,13 +68,16 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 		fs.Usage()
 		return fmt.Errorf("--until is required")
 	}
-	if *rawOutput && *jqFilter == "" {
+	if *rawOutput && !jqSet {
 		fs.Usage()
 		return fmt.Errorf("-r requires --jq")
 	}
 
 	var jqCode *gojq.Code
-	if *jqFilter != "" {
+	if jqSet {
+		if *jqFilter == "" {
+			return fmt.Errorf("parse --jq expression: empty expression")
+		}
 		query, err := gojq.Parse(*jqFilter)
 		if err != nil {
 			return fmt.Errorf("parse --jq expression: %w", err)
