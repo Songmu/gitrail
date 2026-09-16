@@ -91,7 +91,7 @@ func Run(ctx context.Context, argv []string, outStream, errStream io.Writer) err
 	}
 
 	if jqCode != nil {
-		return outputJQ(outStream, result, jqCode, *rawOutput)
+		return outputJQ(ctx, outStream, result, jqCode, *rawOutput)
 	}
 	if *jsonOut {
 		return outputJSON(outStream, result)
@@ -149,9 +149,9 @@ func outputJSON(out io.Writer, result *Result) error {
 	return nil
 }
 
-func outputJQ(out io.Writer, result *Result, code *gojq.Code, raw bool) error {
+func outputJQ(ctx context.Context, out io.Writer, result *Result, code *gojq.Code, raw bool) error {
 	for _, c := range result.Changes {
-		iter := code.Run(newJSONFileChange(result, c))
+		iter := code.RunWithContext(ctx, newJSONFileChange(result, c))
 		for {
 			value, ok := iter.Next()
 			if !ok {

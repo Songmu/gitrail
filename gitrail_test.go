@@ -3,9 +3,12 @@ package gitrail
 import (
 	"bytes"
 	"context"
+	"io"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/itchyny/gojq"
 )
 
 func TestRunSkillsList(t *testing.T) {
@@ -440,6 +443,26 @@ func TestRunJQRuntimeError(t *testing.T) {
 	}, &out, os.Stderr)
 	if err == nil || !strings.Contains(err.Error(), "run --jq expression") {
 		t.Errorf("Run failing --jq error = %v, want runtime error", err)
+	}
+}
+
+func TestOutputJQHonorsContextCancellation(t *testing.T) {
+	query, err := gojq.Parse("repeat(1)")
+	if err != nil {
+		t.Fatalf("Parse jq expression: %v", err)
+	}
+	code, err := gojq.Compile(query)
+	if err != nil {
+		t.Fatalf("Compile jq expression: %v", err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	err = outputJQ(ctx, io.Discard, &Result{
+		Changes: []FileChange{{Status: Added, Path: "foo.go"}},
+	}, code, false)
+	if err == nil || !strings.Contains(err.Error(), "context canceled") {
+		t.Errorf("outputJQ error = %v, want context cancellation", err)
 	}
 }
 
