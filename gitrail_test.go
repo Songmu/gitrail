@@ -447,10 +447,12 @@ func TestRunInvalidJQExpression(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var out, errOut bytes.Buffer
-			args := append([]string{
+			args := make([]string, 0, 2+len(tt.args))
+			args = append(args,
 				"--since=2026-01-01",
 				"--until=2026-03-01",
-			}, tt.args...)
+			)
+			args = append(args, tt.args...)
 			err := Run(context.Background(), args, &out, &errOut)
 			if err == nil || !strings.Contains(err.Error(), "parse --jq expression") {
 				t.Errorf("Run invalid --jq error = %v, want parse error", err)
