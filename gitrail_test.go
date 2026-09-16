@@ -408,6 +408,41 @@ func TestRunRawOutputRequiresJQ(t *testing.T) {
 	}
 }
 
+func TestRunInvalidJQExpression(t *testing.T) {
+	var out, errOut bytes.Buffer
+	err := Run(context.Background(), []string{
+		"--since=2026-01-01",
+		"--until=2026-03-01",
+		"--jq=.[",
+	}, &out, &errOut)
+	if err == nil || !strings.Contains(err.Error(), "parse --jq expression") {
+		t.Errorf("Run invalid --jq error = %v, want parse error", err)
+	}
+}
+
+func TestRunJQRuntimeError(t *testing.T) {
+	gm := newTestRepo(t)
+	ctx := context.Background()
+
+	testCommit(t, gm, "2026-01-10T00:00:00Z", "initial", map[string]string{
+		"foo.go": "package main\n",
+	})
+	testCommit(t, gm, "2026-02-10T00:00:00Z", "add file", map[string]string{
+		"bar.go": "package main\n",
+	})
+
+	var out bytes.Buffer
+	err := Run(ctx, []string{
+		"-C", gm.RepoPath(),
+		"--since=2026-01-15T00:00:00Z",
+		"--until=2026-03-01T00:00:00Z",
+		"--jq=error(\"failed\")",
+	}, &out, os.Stderr)
+	if err == nil || !strings.Contains(err.Error(), "run --jq expression") {
+		t.Errorf("Run failing --jq error = %v, want runtime error", err)
+	}
+}
+
 func TestRunExitCode2(t *testing.T) {
 	gm := newTestRepo(t)
 	ctx := context.Background()
