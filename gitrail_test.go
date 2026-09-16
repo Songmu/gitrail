@@ -403,13 +403,13 @@ func TestRunJQRawOutput(t *testing.T) {
 		"-C", gm.RepoPath(),
 		"--since=2026-01-15T00:00:00Z",
 		"--until=2026-03-01T00:00:00Z",
-		"--jq=.path | length",
+		"--jq=[.path]",
 		"-r",
 	}, &out, os.Stderr)
 	if err != nil {
 		t.Fatalf("Run --jq -r with non-string result: %v", err)
 	}
-	if got, want := out.String(), "6\n"; got != want {
+	if got, want := out.String(), "[\"bar.go\"]\n"; got != want {
 		t.Errorf("Run --jq -r with non-string result output = %q, want %q", got, want)
 	}
 }
