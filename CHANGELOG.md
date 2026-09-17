@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.8](https://github.com/Songmu/gitrail/compare/v0.0.7...v0.0.8) - 2026-09-17
+
+- instruction installation in SKILL.md by @Songmu in https://github.com/Songmu/gitrail/pull/37
+
 ## [v0.0.7](https://github.com/Songmu/gitrail/compare/v0.0.6...v0.0.7) - 2026-09-16
 
 - Bump reviewdog/action-staticcheck from 1.28.0 to 1.29.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/33
