@@ -26,6 +26,28 @@ allowed-tools:
 
 Always use `--json` for agent use to get structured, machine-readable output.
 
+## Availability and Installation
+
+Before invoking `gitrail`, check whether it is available with
+`command -v gitrail`.
+
+If the command is unavailable, do not install it automatically. Explain that
+`gitrail` is required and ask the user to install it or approve installation.
+Prefer the fully qualified Homebrew formula on macOS or Linux:
+
+```console
+brew install Songmu/tap/gitrail
+```
+
+This command trusts only the requested formula from the third-party tap; a
+separate `brew trust` step is not needed for installation or routine updates.
+
+If Homebrew is unavailable but Go is installed, use:
+
+```console
+go install github.com/Songmu/gitrail/cmd/gitrail@latest
+```
+
 ## CLI Usage
 
 ```
