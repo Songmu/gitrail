@@ -1,0 +1,20 @@
+name: Set up gitrail
+description: Install gitrail and add it to PATH
+author: Songmu
+
+runs:
+  using: composite
+  steps:
+    - name: Install gitrail
+      shell: bash
+      run: |
+        version="v0.0.8"
+        bindir="${RUNNER_TEMP%/}/gitrail/bin"
+
+        sh "${GITHUB_ACTION_PATH}/install.sh" \
+          -b "${bindir}" "${version}"
+        echo "${bindir}" >> "${GITHUB_PATH}"
+
+branding:
+  icon: git-commit
+  color: blue
