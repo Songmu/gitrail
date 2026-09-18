@@ -50,9 +50,6 @@ cleanup() {
   fi
 }
 execute() {
-  tmpdir=$(mktemp -d)
-  trap cleanup 0
-  trap 'exit 1' HUP INT TERM
   log_debug "downloading files into ${tmpdir}"
   http_download "${tmpdir}/${TARBALL}" "${TARBALL_URL}"
   http_download "${tmpdir}/${CHECKSUM}" "${CHECKSUM_URL}"
@@ -67,8 +64,6 @@ execute() {
     install "${srcdir}/${binexe}" "${BINDIR}/"
     log_info "installed ${BINDIR}/${binexe}"
   done
-  cleanup
-  trap - 0 HUP INT TERM
 }
 get_binaries() {
   case "$PLATFORM" in
@@ -291,10 +286,9 @@ http_download() {
   return 1
 }
 http_copy() {
-  tmp=$(mktemp)
+  tmp="${tmpdir}/http-copy"
   http_download "${tmp}" "$1" "$2" || return 1
-  body=$(cat "$tmp")
-  rm -f "${tmp}"
+  body=$(cat "${tmp}")
   echo "$body"
 }
 github_release() {
@@ -375,6 +369,10 @@ parse_args "$@"
 
 get_binaries
 
+tmpdir=$(mktemp -d)
+trap cleanup 0
+trap 'exit 1' HUP INT TERM
+
 tag_to_version
 
 adjust_format
@@ -393,3 +391,6 @@ CHECKSUM_URL=${GITHUB_DOWNLOAD}/${TAG}/${CHECKSUM}
 
 
 execute
+
+cleanup
+trap - 0 HUP INT TERM
