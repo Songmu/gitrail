@@ -43,8 +43,16 @@ parse_args() {
 # if a curl|bash cuts off the end of the script due to
 # network, either nothing will happen or will syntax error
 # out preventing half-done work
+cleanup() {
+  if [ -n "${tmpdir:-}" ]; then
+    rm -rf "${tmpdir}"
+    tmpdir=
+  fi
+}
 execute() {
   tmpdir=$(mktemp -d)
+  trap cleanup 0
+  trap 'exit 1' HUP INT TERM
   log_debug "downloading files into ${tmpdir}"
   http_download "${tmpdir}/${TARBALL}" "${TARBALL_URL}"
   http_download "${tmpdir}/${CHECKSUM}" "${CHECKSUM_URL}"
@@ -59,7 +67,8 @@ execute() {
     install "${srcdir}/${binexe}" "${BINDIR}/"
     log_info "installed ${BINDIR}/${binexe}"
   done
-  rm -rf "${tmpdir}"
+  cleanup
+  trap - 0 HUP INT TERM
 }
 get_binaries() {
   case "$PLATFORM" in
