@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.0.9](https://github.com/Songmu/gitrail/compare/v0.0.8...v0.0.9) - 2026-09-18
+
+- Bump reviewdog/action-misspell from 1.27.0 to 1.29.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/43
+- Bump github.com/itchyny/gojq from 0.12.18 to 0.12.19 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/44
+- Bump codecov/codecov-action from 7.0.0 to 7.1.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/42
+- Bump reviewdog/action-staticcheck from 1.29.0 to 1.32.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/41
+- Bump reviewdog/action-actionlint from 1.72.0 to 1.74.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/40
+- Bump actions/setup-go from 6.5.0 to 7.0.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/39
+- Add composite action for installing gitrail by @Songmu in https://github.com/Songmu/gitrail/pull/46
+
 ## [v0.0.8](https://github.com/Songmu/gitrail/compare/v0.0.7...v0.0.8) - 2026-09-17
 
 - instruction installation in SKILL.md by @Songmu in https://github.com/Songmu/gitrail/pull/37
