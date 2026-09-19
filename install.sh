@@ -301,9 +301,27 @@ github_release() {
   test -z "$version" && return 1
   echo "$version"
 }
+gh_supports_safe_attestation() {
+  gh --version 2>/dev/null | awk '
+    NR == 1 {
+      if ($3 !~ /^[0-9]+\.[0-9]+\.[0-9]+$/) {
+        exit 1
+      }
+      split($3, version, ".")
+      exit !(version[1] > 2 || (version[1] == 2 && version[2] >= 93))
+    }
+    END {
+      if (NR == 0) {
+        exit 1
+      }
+    }
+  '
+}
 verify() {
   artifact=$1
-  if is_command gh && gh attestation verify --help >/dev/null 2>&1; then
+  if is_command gh &&
+    gh_supports_safe_attestation &&
+    gh attestation verify --help >/dev/null 2>&1; then
     log_info "verifying build provenance for ${artifact##*/}"
     gh attestation verify "$artifact" --repo "$OWNER/$REPO"
     log_info "verified build provenance for ${artifact##*/}"
@@ -340,7 +358,7 @@ hash_sha256_verify() {
     return 1
   fi
   BASENAME=${TARGET##*/}
-  want=$(grep "${BASENAME}" "${checksums}" 2>/dev/null | tr '\t' ' ' | cut -d ' ' -f 1)
+  want=$(awk -v basename="$BASENAME" '$2 == basename { print $1; exit }' "${checksums}" 2>/dev/null)
   if [ -z "$want" ]; then
     log_err "hash_sha256_verify unable to find checksum for '${TARGET}' in '${checksums}'"
     return 1
