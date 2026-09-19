@@ -1,12 +1,7 @@
-name: reusable release
+name: release build
 
 on:
   workflow_call:
-    inputs:
-      tag:
-        description: tag name to be released
-        required: true
-        type: string
 
 jobs:
   build:
@@ -34,7 +29,7 @@ jobs:
       id: goxz
       uses: Songmu/goxz@ca593d878bfc0fe683ab80243fad53aeef4bcbfd # v0.11.1
       with:
-        package-version: ${{ inputs.tag }}
+        package-version: ${{ github.ref_name }}
         os: linux,darwin
         packages: ./cmd/gitrail
         build-ldflags: -s -w -X github.com/Songmu/gitrail.revision=${{ steps.build.outputs.revision }}
@@ -51,29 +46,7 @@ jobs:
     - name: upload release artifacts
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
-        name: release-${{ inputs.tag }}
+        name: release-${{ github.ref_name }}
         path: "${{ steps.goxz.outputs.output-dir }}/*"
         if-no-files-found: error
         retention-days: 1
-
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      actions: read
-      contents: write
-    steps:
-    - name: download release artifacts
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-      with:
-        name: release-${{ inputs.tag }}
-        path: release
-    - name: publish GitHub release
-      uses: tcnksm/ghr@766f869eacbbb086e8860cf0f0192dda6e8e67e1 # v0.18.3
-      with:
-        owner: ${{ github.repository_owner }}
-        repository: ${{ github.event.repository.name }}
-        tag: ${{ inputs.tag }}
-        token: ${{ github.token }}
-        path: release
