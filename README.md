@@ -140,6 +140,25 @@ See [pkg.go.dev](https://pkg.go.dev/github.com/Songmu/gitrail) for full API docu
 % go install github.com/Songmu/gitrail/cmd/gitrail@latest
 ```
 
+## GitHub Actions
+
+The action installs gitrail and adds it to `PATH`:
+
+```yaml
+permissions:
+  attestations: read
+  contents: read
+
+steps:
+- uses: actions/checkout@v7
+- uses: Songmu/gitrail@v0
+- run: gitrail
+```
+
+The `attestations: read` permission allows the action to verify the downloaded
+gitrail binary. The `contents: read` permission is required by the checkout
+step.
+
 ## Author
 
 [Songmu](https://github.com/Songmu)
