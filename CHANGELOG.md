@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.0.11](https://github.com/Songmu/gitrail/compare/v0.0.10...v0.0.11) - 2026-09-19
+
+- remove release and upload target from Makfile by @Songmu in https://github.com/Songmu/gitrail/pull/50
+- Harden action attestation verification by @Songmu in https://github.com/Songmu/gitrail/pull/52
+- Use goxz action for release builds by @Songmu in https://github.com/Songmu/gitrail/pull/53
+
 ## [v0.0.10](https://github.com/Songmu/gitrail/compare/v0.0.9...v0.0.10) - 2026-09-19
 
 - Add prepare-release make target for tagpr command by @Songmu with @Copilot in https://github.com/Songmu/gitrail/pull/47
