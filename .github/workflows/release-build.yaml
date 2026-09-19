@@ -13,16 +13,6 @@ jobs:
       contents: read
       id-token: write
     steps:
-    - name: validate release ref
-      id: release
-      run: |
-        if [[ "$GITHUB_REF_TYPE" != "tag" ||
-              ! "$GITHUB_REF_NAME" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
-          echo "::error::release workflow must run from a semantic-version tag"
-          exit 1
-        fi
-
-        echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
     - name: checkout
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
@@ -39,7 +29,7 @@ jobs:
       id: goxz
       uses: Songmu/goxz@ca593d878bfc0fe683ab80243fad53aeef4bcbfd # v0.11.1
       with:
-        package-version: ${{ steps.release.outputs.tag }}
+        package-version: ${{ github.ref_name }}
         os: linux,darwin
         packages: ./cmd/gitrail
         build-ldflags: -s -w -X github.com/Songmu/gitrail.revision=${{ steps.build.outputs.revision }}
@@ -56,7 +46,7 @@ jobs:
     - name: upload release artifacts
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
-        name: release-${{ steps.release.outputs.tag }}
+        name: release-${{ github.ref_name }}
         path: "${{ steps.goxz.outputs.output-dir }}/*"
         if-no-files-found: error
         retention-days: 1
