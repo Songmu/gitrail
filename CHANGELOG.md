@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.14](https://github.com/Songmu/gitrail/compare/v0.0.13...v0.0.14) - 2026-09-19
+
+- Specify repository for release publishing by @Songmu in https://github.com/Songmu/gitrail/pull/61
+
 ## [v0.0.13](https://github.com/Songmu/gitrail/compare/v0.0.12...v0.0.13) - 2026-09-19
 
 - Use gocredits directly by @Songmu in https://github.com/Songmu/gitrail/pull/56
