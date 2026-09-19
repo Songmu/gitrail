@@ -25,16 +25,22 @@ build:
 install:
 	go install -ldflags=$(BUILD_LDFLAGS) ./cmd/gitrail
 
+.PHONY: prepare-release
+prepare-release: devel-deps
+	go get
+	go mod tidy
+	godzil credits -w
+	git add go.mod go.sum CREDITS
+
 .PHONY: release
 release: devel-deps
+	go mod download
 	godzil release
-
-CREDITS: go.sum deps devel-deps
-	godzil credits -w
 
 DIST_DIR = dist
 .PHONY: crossbuild
-crossbuild: CREDITS
+crossbuild: devel-deps
+	go mod download
 	rm -rf $(DIST_DIR)
 	godzil crossbuild -pv=v$(VERSION) -build-ldflags=$(BUILD_LDFLAGS) \
       -os=linux,darwin -d=$(DIST_DIR) ./cmd/*
