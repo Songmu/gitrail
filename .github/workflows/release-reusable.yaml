@@ -72,6 +72,8 @@ jobs:
     - name: publish GitHub release
       uses: tcnksm/ghr@766f869eacbbb086e8860cf0f0192dda6e8e67e1 # v0.18.3
       with:
+        owner: ${{ github.repository_owner }}
+        repository: ${{ github.event.repository.name }}
         tag: ${{ inputs.tag }}
         token: ${{ github.token }}
         path: release
