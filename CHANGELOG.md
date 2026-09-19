@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.15](https://github.com/Songmu/gitrail/compare/v0.0.14...v0.0.15) - 2026-09-19
+
+- Enforce trusted release provenance by @Songmu in https://github.com/Songmu/gitrail/pull/63
+
 ## [v0.0.14](https://github.com/Songmu/gitrail/compare/v0.0.13...v0.0.14) - 2026-09-19
 
 - Specify repository for release publishing by @Songmu in https://github.com/Songmu/gitrail/pull/61
