@@ -32,11 +32,6 @@ prepare-release: devel-deps
 	godzil credits -w
 	git add go.mod go.sum CREDITS
 
-.PHONY: release
-release: devel-deps
-	go mod download
-	godzil release
-
 DIST_DIR = dist
 .PHONY: crossbuild
 crossbuild: devel-deps
@@ -45,7 +40,3 @@ crossbuild: devel-deps
 	godzil crossbuild -pv=v$(VERSION) -build-ldflags=$(BUILD_LDFLAGS) \
       -os=linux,darwin -d=$(DIST_DIR) ./cmd/*
 	cd $(DIST_DIR) && shasum -a 256 $$(find * -type f -maxdepth 0) > SHA256SUMS
-
-.PHONY: upload
-upload:
-	ghr v$(VERSION) dist
