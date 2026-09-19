@@ -167,7 +167,7 @@ verify() {
     log_info "verifying build provenance for ${artifact##*/}"
     gh attestation verify "$artifact" \
       --repo "$OWNER/$REPO" \
-      --signer-workflow "$OWNER/$REPO/.github/workflows/release-reusable.yaml" \
+      --signer-workflow "$OWNER/$REPO/.github/workflows/release-build.yaml" \
       --signer-digest "$signer_digest" \
       --source-digest "$signer_digest"
     log_info "verified build provenance for ${artifact##*/}"

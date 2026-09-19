@@ -13,7 +13,7 @@ jobs:
       attestations: write
       contents: read
       id-token: write
-    uses: ./.github/workflows/release-reusable.yaml
+    uses: ./.github/workflows/release-build.yaml
 
   publish:
     needs: build
