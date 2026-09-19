@@ -23,19 +23,12 @@ jobs:
     - name: resolve and validate release tag
       id: release
       run: |
-        release_tags=()
-        while IFS= read -r tag; do
-          if [[ "$tag" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
-            release_tags+=("$tag")
-          fi
-        done < <(git tag --points-at "$GITHUB_SHA")
-
-        if [[ ${#release_tags[@]} -ne 1 ]]; then
+        resolved_tag="$(git tag --points-at "$GITHUB_SHA" --list 'v*.*.*')"
+        if [[ ! "$resolved_tag" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
           echo "::error::expected exactly one release tag for $GITHUB_SHA"
           exit 1
         fi
 
-        resolved_tag="${release_tags[0]}"
         echo "tag=$resolved_tag" >> "$GITHUB_OUTPUT"
     - name: setup go
       uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
