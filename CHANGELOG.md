@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.12](https://github.com/Songmu/gitrail/compare/v0.0.11...v0.0.12) - 2026-09-19
+
+- Update release action for goxz v0.11.1 by @Songmu in https://github.com/Songmu/gitrail/pull/54
+
 ## [v0.0.11](https://github.com/Songmu/gitrail/compare/v0.0.10...v0.0.11) - 2026-09-19
 
 - remove release and upload target from Makfile by @Songmu in https://github.com/Songmu/gitrail/pull/50
