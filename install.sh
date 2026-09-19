@@ -166,9 +166,6 @@ is_command() {
 echoerr() {
   echo "$@" 1>&2
 }
-log_prefix() {
-  echo "$0"
-}
 
 _shlib_logp=6
 
@@ -593,7 +590,6 @@ EOF
 PROJECT_NAME="gitrail"
 OWNER=Songmu
 REPO="gitrail"
-BINARY=gitrail
 FORMAT=tar.gz
 OS=$(uname_os)
 ARCH=$(uname_arch)
