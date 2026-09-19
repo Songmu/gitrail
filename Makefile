@@ -35,7 +35,7 @@ prepare-release: devel-deps
 DIST_DIR = dist
 .PHONY: crossbuild
 crossbuild: devel-deps
-	go mod download
+	go mod tidy -diff
 	rm -rf $(DIST_DIR)
 	godzil crossbuild -pv=v$(VERSION) -build-ldflags=$(BUILD_LDFLAGS) \
       -os=linux,darwin -d=$(DIST_DIR) ./cmd/*
