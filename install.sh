@@ -134,15 +134,42 @@ gh_supports_safe_attestation() {
     }
   '
 }
+gh_supports_attestation_digests() {
+  gh attestation verify --help 2>/dev/null |
+    grep -q -- '--signer-digest'
+}
+github_tag_digest() {
+  git ls-remote "https://github.com/${OWNER}/${REPO}.git" \
+    "refs/tags/${TAG}" "refs/tags/${TAG}^{}" |
+    awk '
+      $2 ~ /\^\{\}$/ { peeled = $1 }
+      $2 !~ /\^\{\}$/ { direct = $1 }
+      END {
+        if (peeled != "") {
+          print peeled
+        } else {
+          print direct
+        }
+      }
+    '
+}
 verify() {
   artifact=$1
   if is_command gh &&
+    is_command git &&
     gh_supports_safe_attestation &&
-    gh attestation verify --help >/dev/null 2>&1; then
+    gh_supports_attestation_digests; then
+    signer_digest=$(github_tag_digest)
+    if [ -z "$signer_digest" ]; then
+      log_crit "unable to resolve source digest for ${TAG}"
+      exit 1
+    fi
     log_info "verifying build provenance for ${artifact##*/}"
     gh attestation verify "$artifact" \
       --repo "$OWNER/$REPO" \
-      --signer-workflow "$OWNER/$REPO/.github/workflows/release-reusable.yaml"
+      --signer-workflow "$OWNER/$REPO/.github/workflows/release-reusable.yaml" \
+      --signer-digest "$signer_digest" \
+      --source-digest "$signer_digest"
     log_info "verified build provenance for ${artifact##*/}"
     return
   fi
