@@ -134,31 +134,15 @@ gh_supports_safe_attestation() {
     }
   '
 }
-uses_trusted_release_workflow() {
-  _gitrail_version=${VERSION#v}
-  _gitrail_major=${_gitrail_version%%.*}
-  _gitrail_remainder=${_gitrail_version#*.}
-  _gitrail_minor=${_gitrail_remainder%%.*}
-  _gitrail_patch=${_gitrail_remainder#*.}
-  _gitrail_patch=${_gitrail_patch%%[-+]*}
-
-  [ "$_gitrail_major" -gt 0 ] ||
-    [ "$_gitrail_minor" -gt 0 ] ||
-    [ "$_gitrail_patch" -ge 13 ]
-}
 verify() {
   artifact=$1
   if is_command gh &&
     gh_supports_safe_attestation &&
     gh attestation verify --help >/dev/null 2>&1; then
     log_info "verifying build provenance for ${artifact##*/}"
-    if uses_trusted_release_workflow; then
-      gh attestation verify "$artifact" \
-        --repo "$OWNER/$REPO" \
-        --signer-workflow "$OWNER/$REPO/.github/workflows/release-reusable.yaml"
-    else
-      gh attestation verify "$artifact" --repo "$OWNER/$REPO"
-    fi
+    gh attestation verify "$artifact" \
+      --repo "$OWNER/$REPO" \
+      --signer-workflow "$OWNER/$REPO/.github/workflows/release-reusable.yaml"
     log_info "verified build provenance for ${artifact##*/}"
     return
   fi
