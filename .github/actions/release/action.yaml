@@ -14,36 +14,32 @@ runs:
     uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
     with:
       go-version-file: go.mod
-  - name: check module files
-    run: |
-      go mod tidy -diff
-    shell: bash
   - name: prepare release build
     id: build
     run: |
-      rm -rf dist
       echo "revision=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
     shell: bash
   - name: build release archives
     id: goxz
-    uses: Songmu/goxz@3e773e7fb3b761888365d21baa1ed352d9a5563b # v0.11.0
+    uses: Songmu/goxz@ca593d878bfc0fe683ab80243fad53aeef4bcbfd # v0.11.1
     with:
       package-version: ${{ inputs.tag }}
       os: linux,darwin
-      destination: dist
       packages: ./cmd/gitrail
       build-ldflags: -s -w -X github.com/Songmu/gitrail.revision=${{ steps.build.outputs.revision }}
   - name: generate checksums
+    env:
+      OUTPUT_DIR: ${{ steps.goxz.outputs.output-dir }}
     run: |
-      cd "${{ steps.goxz.outputs.artifacts }}"
-      shasum -a 256 ./* | sed 's#  \./#  #' > SHA256SUMS
+      cd "$OUTPUT_DIR"
+      shasum -a 256 * > SHA256SUMS
     shell: bash
   - name: attest build provenance
     uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
     with:
-      subject-path: "${{ steps.goxz.outputs.artifacts }}/*"
+      subject-path: "${{ steps.goxz.outputs.output-dir }}/*"
   - uses: tcnksm/ghr@766f869eacbbb086e8860cf0f0192dda6e8e67e1 # v0.18.3
     with:
       tag: ${{ inputs.tag }}
       token: ${{ inputs.token }}
-      path: ${{ steps.goxz.outputs.artifacts }}
+      path: ${{ steps.goxz.outputs.output-dir }}
