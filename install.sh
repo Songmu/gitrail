@@ -52,9 +52,12 @@ cleanup() {
 execute() {
   log_debug "downloading files into ${tmpdir}"
   http_download "${tmpdir}/${TARBALL}" "${TARBALL_URL}"
-  http_download "${tmpdir}/${CHECKSUM}" "${CHECKSUM_URL}"
-  hash_sha256_verify "${tmpdir}/${TARBALL}" "${tmpdir}/${CHECKSUM}"
-  attestation_verify "${tmpdir}/${TARBALL}"
+  if can_verify_attestation; then
+    attestation_verify "${tmpdir}/${TARBALL}"
+  else
+    http_download "${tmpdir}/${CHECKSUM}" "${CHECKSUM_URL}"
+    hash_sha256_verify "${tmpdir}/${TARBALL}" "${tmpdir}/${CHECKSUM}"
+  fi
   srcdir="${tmpdir}/${NAME}"
   (cd "${tmpdir}" && untar "${TARBALL}")
   test ! -d "${BINDIR}" && install -d "${BINDIR}"
@@ -303,11 +306,11 @@ github_release() {
   test -z "$version" && return 1
   echo "$version"
 }
+can_verify_attestation() {
+  is_command gh && gh attestation verify --help >/dev/null 2>&1
+}
 attestation_verify() {
   artifact=$1
-  if ! is_command gh || ! gh attestation verify --help >/dev/null 2>&1; then
-    return 0
-  fi
   log_info "verifying build provenance for ${artifact##*/}"
   gh attestation verify "$artifact" --repo "$OWNER/$REPO"
 }
