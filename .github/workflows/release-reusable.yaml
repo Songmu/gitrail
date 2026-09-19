@@ -23,9 +23,9 @@ jobs:
     - name: resolve and validate release tag
       id: release
       run: |
-        resolved_tag="$(git tag --points-at "$GITHUB_SHA" --list 'v*.*.*')"
+        resolved_tag="$(git describe --tags --exact-match "$GITHUB_SHA")"
         if [[ ! "$resolved_tag" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
-          echo "::error::expected exactly one release tag for $GITHUB_SHA"
+          echo "::error::expected a semantic-version release tag for $GITHUB_SHA"
           exit 1
         fi
 
