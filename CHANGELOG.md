@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.0.13](https://github.com/Songmu/gitrail/compare/v0.0.12...v0.0.13) - 2026-09-19
+
+- Use gocredits directly by @Songmu in https://github.com/Songmu/gitrail/pull/56
+- Harden installer verification by @Songmu in https://github.com/Songmu/gitrail/pull/58
+- Update vendored shlib to v2026.08.30 by @Songmu in https://github.com/Songmu/gitrail/pull/59
+- Use reusable workflow for SLSA release provenance by @Songmu in https://github.com/Songmu/gitrail/pull/60
+
 ## [v0.0.12](https://github.com/Songmu/gitrail/compare/v0.0.11...v0.0.12) - 2026-09-19
 
 - Update release action for goxz v0.11.1 by @Songmu in https://github.com/Songmu/gitrail/pull/54
