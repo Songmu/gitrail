@@ -155,9 +155,9 @@ steps:
 - run: gitrail
 ```
 
-The `attestations: read` permission allows the action to verify the downloaded
-gitrail binary. The `contents: read` permission is required by the checkout
-step.
+The `attestations: read` permission allows the action to verify that the
+downloaded gitrail binary was signed by the trusted reusable release workflow.
+The `contents: read` permission is required by the checkout step.
 
 ## Author
 

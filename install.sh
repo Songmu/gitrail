@@ -140,7 +140,9 @@ verify() {
     gh_supports_safe_attestation &&
     gh attestation verify --help >/dev/null 2>&1; then
     log_info "verifying build provenance for ${artifact##*/}"
-    gh attestation verify "$artifact" --repo "$OWNER/$REPO"
+    gh attestation verify "$artifact" \
+      --repo "$OWNER/$REPO" \
+      --signer-workflow "$OWNER/$REPO/.github/workflows/release-reusable.yaml"
     log_info "verified build provenance for ${artifact##*/}"
     return
   fi
