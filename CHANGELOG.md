@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.0.10](https://github.com/Songmu/gitrail/compare/v0.0.9...v0.0.10) - 2026-09-19
+
+- Add prepare-release make target for tagpr command by @Songmu with @Copilot in https://github.com/Songmu/gitrail/pull/47
+- Add provenance attestations for release artifacts by @Songmu with @Copilot in https://github.com/Songmu/gitrail/pull/49
+
 ## [v0.0.9](https://github.com/Songmu/gitrail/compare/v0.0.8...v0.0.9) - 2026-09-18
 
 - Bump reviewdog/action-misspell from 1.27.0 to 1.29.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/43
