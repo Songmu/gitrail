@@ -27,7 +27,7 @@ jobs:
           git tag --points-at "$GITHUB_SHA" |
             awk '/^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/'
         )"
-        if [[ ! "$resolved_tag" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+        if [[ -z "$resolved_tag" || "$resolved_tag" == *$'\n'* ]]; then
           echo "::error::expected a semantic-version release tag for $GITHUB_SHA"
           exit 1
         fi
