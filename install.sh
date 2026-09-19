@@ -306,10 +306,12 @@ verify() {
   if is_command gh && gh attestation verify --help >/dev/null 2>&1; then
     log_info "verifying build provenance for ${artifact##*/}"
     gh attestation verify "$artifact" --repo "$OWNER/$REPO"
-  else
-    http_download "${tmpdir}/${CHECKSUM}" "${CHECKSUM_URL}"
-    hash_sha256_verify "$artifact" "${tmpdir}/${CHECKSUM}"
+    log_info "verified build provenance for ${artifact##*/}"
+    return
   fi
+  log_info "build provenance verification unavailable; falling back to SHA256"
+  http_download "${tmpdir}/${CHECKSUM}" "${CHECKSUM_URL}"
+  hash_sha256_verify "$artifact" "${tmpdir}/${CHECKSUM}"
 }
 hash_sha256() {
   TARGET=${1:-/dev/stdin}
