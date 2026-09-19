@@ -20,6 +20,10 @@ runs:
     shell: bash
     env:
       GITHUB_TOKEN: ${{ inputs.token }}
+  - name: attest build provenance
+    uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+    with:
+      subject-path: "dist/*"
   - uses: tcnksm/ghr@766f869eacbbb086e8860cf0f0192dda6e8e67e1 # v0.18.3
     with:
       tag: ${{ inputs.tag }}
