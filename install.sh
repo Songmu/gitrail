@@ -165,6 +165,10 @@ verify() {
       exit 1
     fi
     log_info "verifying build provenance for ${artifact##*/}"
+    # release-build.yaml is triggered from the same commit that TAG points
+    # to, so the workflow commit and the source commit are identical here;
+    # pass the same digest to both flags to pin the attestation to that
+    # exact commit and prevent tag-reassignment attacks.
     gh attestation verify "$artifact" \
       --repo "$OWNER/$REPO" \
       --signer-workflow "$OWNER/$REPO/.github/workflows/release-build.yaml" \
