@@ -66,18 +66,12 @@ execute() {
 }
 get_binaries() {
   case "$PLATFORM" in
-    darwin/386) BINARIES="gitrail" ;;
     darwin/amd64) BINARIES="gitrail" ;;
     darwin/arm64) BINARIES="gitrail" ;;
-    darwin/armv6) BINARIES="gitrail" ;;
-    linux/386) BINARIES="gitrail" ;;
     linux/amd64) BINARIES="gitrail" ;;
     linux/arm64) BINARIES="gitrail" ;;
-    linux/armv6) BINARIES="gitrail" ;;
-    windows/386) BINARIES="gitrail" ;;
     windows/amd64) BINARIES="gitrail" ;;
     windows/arm64) BINARIES="gitrail" ;;
-    windows/armv6) BINARIES="gitrail" ;;
     *)
       log_crit "platform $PLATFORM is not supported.  Make sure this script is up-to-date and file request at https://github.com/${PREFIX}/issues/new"
       exit 1
