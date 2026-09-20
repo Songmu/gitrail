@@ -3,6 +3,10 @@ name: release
 on:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     if: github.ref_type == 'tag'
