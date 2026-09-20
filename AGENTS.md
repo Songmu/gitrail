@@ -12,3 +12,10 @@ not otherwise required.
   releases created under older provenance policies is not required.
 - Do not add test or approval gating to this repository's release workflow.
   Pre-tag validation and approval, if implemented, belong to tagpr.
+
+## GitHub Actions policy
+
+- Continue pinning actions to full commit SHAs.
+- Do not enable repository-level SHA pinning enforcement for now. Re-evaluate
+  it after GitHub's planned workflow-level dependency locking, including
+  transitive dependencies, becomes generally available.
