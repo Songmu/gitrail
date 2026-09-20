@@ -30,7 +30,7 @@ jobs:
       uses: Songmu/goxz@ca593d878bfc0fe683ab80243fad53aeef4bcbfd # v0.11.1
       with:
         package-version: ${{ github.ref_name }}
-        os: linux,darwin
+        os: linux,darwin,windows
         packages: ./cmd/gitrail
         build-ldflags: -s -w -X github.com/Songmu/gitrail.revision=${{ steps.build.outputs.revision }}
     - name: generate checksums
