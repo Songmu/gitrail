@@ -9,7 +9,7 @@ deps:
 
 .PHONY: devel-deps
 devel-deps:
-	go install github.com/Songmu/gocredits/cmd/gocredits@latest
+	go install github.com/Songmu/gocredits/cmd/gocredits@v0.5.0
 
 .PHONY: test
 test:
