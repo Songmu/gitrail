@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.0.16](https://github.com/Songmu/gitrail/compare/v0.0.15...v0.0.16) - 2026-09-21
+
+- install.sh: comment on signer-digest/source-digest usage by @Songmu with @Copilot in https://github.com/Songmu/gitrail/pull/65
+- Refine release automation and policies by @Songmu in https://github.com/Songmu/gitrail/pull/67
+- Harden curl downloads in install.sh by @Songmu with @Copilot in https://github.com/Songmu/gitrail/pull/68
+
 ## [v0.0.15](https://github.com/Songmu/gitrail/compare/v0.0.14...v0.0.15) - 2026-09-19
 
 - Enforce trusted release provenance by @Songmu in https://github.com/Songmu/gitrail/pull/63
