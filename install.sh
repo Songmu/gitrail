@@ -356,10 +356,12 @@ http_download_curl() {
   _shlib_local_file=$1
   _shlib_source_url=$2
   _shlib_header=${3-}
+  # --proto '=https' --tlsv1.2 refuse plaintext/downgraded transports so a
+  # network attacker cannot redirect a download to a weaker channel.
   if [ -z "$_shlib_header" ]; then
-    curl -fsSL -o "$_shlib_local_file" "$_shlib_source_url"
+    curl --proto '=https' --tlsv1.2 -fsSL -o "$_shlib_local_file" "$_shlib_source_url"
   else
-    curl -fsSL -H "$_shlib_header" -o "$_shlib_local_file" "$_shlib_source_url"
+    curl --proto '=https' --tlsv1.2 -fsSL -H "$_shlib_header" -o "$_shlib_local_file" "$_shlib_source_url"
   fi
 }
 
