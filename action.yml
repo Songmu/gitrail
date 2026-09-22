@@ -8,7 +8,7 @@ runs:
     - name: Install gitrail
       shell: bash
       run: |
-        version="v0.0.16"
+        version="v0.0.17"
         bindir="${RUNNER_TEMP%/}/gitrail/bin"
 
         sh "${GITHUB_ACTION_PATH}/install.sh" \
