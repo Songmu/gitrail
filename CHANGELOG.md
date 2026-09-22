@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.18](https://github.com/Songmu/gitrail/compare/v0.0.17...v0.0.18) - 2026-09-22
+
+- update ghr to v0.18.5 by @Songmu in https://github.com/Songmu/gitrail/pull/73
+
 ## [v0.0.17](https://github.com/Songmu/gitrail/compare/v0.0.16...v0.0.17) - 2026-09-22
 
 - update install.sh with insmith by @Songmu in https://github.com/Songmu/gitrail/pull/69
