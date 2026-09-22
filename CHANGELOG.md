@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.19](https://github.com/Songmu/gitrail/compare/v0.0.18...v0.0.19) - 2026-09-22
+
+- update tagpr to v1.20.4 by @Songmu in https://github.com/Songmu/gitrail/pull/75
+
 ## [v0.0.18](https://github.com/Songmu/gitrail/compare/v0.0.17...v0.0.18) - 2026-09-22
 
 - update ghr to v0.18.5 by @Songmu in https://github.com/Songmu/gitrail/pull/73
