@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.0.17](https://github.com/Songmu/gitrail/compare/v0.0.16...v0.0.17) - 2026-09-22
+
+- update install.sh with insmith by @Songmu in https://github.com/Songmu/gitrail/pull/69
+- Separate tagpr release dispatch permissions by @Songmu in https://github.com/Songmu/gitrail/pull/71
+- update goxz to newest by @Songmu in https://github.com/Songmu/gitrail/pull/72
+
 ## [v0.0.16](https://github.com/Songmu/gitrail/compare/v0.0.15...v0.0.16) - 2026-09-21
 
 - install.sh: comment on signer-digest/source-digest usage by @Songmu with @Copilot in https://github.com/Songmu/gitrail/pull/65
