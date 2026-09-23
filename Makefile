@@ -25,7 +25,6 @@ install:
 
 .PHONY: prepare-release
 prepare-release: devel-deps
-	go get
 	go mod tidy
 	gocredits -w
-	git add go.mod go.sum CREDITS
+	git update-index --add --remove -- go.mod go.sum CREDITS
