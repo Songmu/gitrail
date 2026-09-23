@@ -23,8 +23,6 @@ jobs:
     - name: verify tag commit is on main
       shell: bash
       run: |
-        # A tag can point to a commit imported from another repository without
-        # that commit ever being merged into this repository's main branch.
         tag_commit=$(git rev-list -n 1 "$GITHUB_REF_NAME")
         if ! git merge-base --is-ancestor "$tag_commit" origin/main; then
           echo "::error title=Invalid release tag::$GITHUB_REF_NAME does not point to a commit on main"
