@@ -33,7 +33,6 @@ jobs:
 
   build:
     needs: validate-tag
-    if: github.ref_type == 'tag'
     permissions:
       artifact-metadata: write
       attestations: write
