@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.21](https://github.com/Songmu/gitrail/compare/v0.0.20...v0.0.21) - 2026-09-23
+
+- Fix gitsign OIDC authentication in tagpr by @Songmu in https://github.com/Songmu/gitrail/pull/80
+
 ## [v0.0.20](https://github.com/Songmu/gitrail/compare/v0.0.19...v0.0.20) - 2026-09-23
 
 - use latest tagpr and setup-gitsign by @Songmu in https://github.com/Songmu/gitrail/pull/77
