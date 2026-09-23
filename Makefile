@@ -28,3 +28,15 @@ prepare-release: devel-deps
 	go mod tidy
 	gocredits -w
 	git update-index --add --remove -- go.mod go.sum CREDITS
+
+.PHONY: infra-validate
+infra-validate:
+	gh infra validate .github/infra.yaml
+
+.PHONY: infra-plan
+infra-plan: infra-validate
+	gh infra plan .github/infra.yaml
+
+.PHONY: infra-apply
+infra-apply: infra-validate
+	gh infra apply .github/infra.yaml

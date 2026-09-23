@@ -160,6 +160,22 @@ downloaded gitrail binary was signed by the trusted release build workflow at
 the release tag's source revision. The `contents: read` permission is required
 by the checkout step.
 
+## Repository Settings
+
+Repository settings are managed with
+[gh-infra](https://github.com/babarot/gh-infra) using
+[`.github/infra.yaml`](.github/infra.yaml). Install the extension and review the
+plan before applying changes locally:
+
+```console
+% gh extension install babarot/gh-infra --pin v0.13.0
+% make infra-plan
+% make infra-apply
+```
+
+The manifest is applied manually and no repository administration credentials
+are stored in GitHub Actions.
+
 ## Author
 
 [Songmu](https://github.com/Songmu)
