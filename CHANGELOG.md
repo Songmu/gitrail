@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.0.20](https://github.com/Songmu/gitrail/compare/v0.0.19...v0.0.20) - 2026-09-23
+
+- use latest tagpr and setup-gitsign by @Songmu in https://github.com/Songmu/gitrail/pull/77
+- restore setup-go by @Songmu in https://github.com/Songmu/gitrail/pull/79
+
 ## [v0.0.19](https://github.com/Songmu/gitrail/compare/v0.0.18...v0.0.19) - 2026-09-22
 
 - update tagpr to v1.20.4 by @Songmu in https://github.com/Songmu/gitrail/pull/75
