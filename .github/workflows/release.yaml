@@ -8,14 +8,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate-tag:
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+    - name: checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+    - name: verify tag commit is on main
+      shell: bash
+      run: |
+        # A tag can point to a commit imported from another repository without
+        # that commit ever being merged into this repository's main branch.
+        tag_commit=$(git rev-list -n 1 "$GITHUB_REF_NAME")
+        if ! git merge-base --is-ancestor "$tag_commit" origin/main; then
+          echo "::error title=Invalid release tag::$GITHUB_REF_NAME does not point to a commit on main"
+          exit 1
+        fi
+
   build:
+    needs: validate-tag
     if: github.ref_type == 'tag'
     permissions:
       artifact-metadata: write
       attestations: write
       contents: read
       id-token: write
-    uses: ./.github/workflows/release-build.yaml
+    uses: $/.github/workflows/release-build.yaml
 
   publish:
     needs: build
