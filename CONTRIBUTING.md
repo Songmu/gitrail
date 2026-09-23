@@ -9,7 +9,7 @@ changes locally:
 
 ```console
 % gh extension install babarot/gh-infra --pin v0.13.0
-% make infra-plan
+% gh infra plan .github/infra.yaml
 ```
 
 Changes merged to `main` are applied by
