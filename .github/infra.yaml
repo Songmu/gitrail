@@ -1,0 +1,26 @@
+apiVersion: gh-infra/v1
+kind: Repository
+metadata:
+  name: gitrail
+  owner: Songmu
+reconcile:
+  rulesets: additive
+spec:
+  release_immutability: true
+  rulesets:
+  - name: Restrict release version tag creation
+    target: tag
+    enforcement: active
+    bypass_actors:
+    - app: github-actions
+      bypass_mode: always
+    conditions:
+      ref_name:
+        include:
+        - refs/tags/v*.*.*
+    rules:
+      creation: true
+  actions:
+    enabled: true
+    workflow_permissions: read
+    can_approve_pull_requests: true
