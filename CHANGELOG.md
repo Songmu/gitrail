@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.0.22](https://github.com/Songmu/gitrail/compare/v0.0.21...v0.0.22) - 2026-09-24
+
+- Generate notes for GitHub releases by @Songmu in https://github.com/Songmu/gitrail/pull/82
+- update prepare-release task in Makefile by @Songmu in https://github.com/Songmu/gitrail/pull/84
+- attestation: read isn't needed by @Songmu in https://github.com/Songmu/gitrail/pull/87
+- update goxz to v0.13.0 and delegate checksum generation to it by @Songmu in https://github.com/Songmu/gitrail/pull/88
+
 ## [v0.0.21](https://github.com/Songmu/gitrail/compare/v0.0.20...v0.0.21) - 2026-09-23
 
 - Fix gitsign OIDC authentication in tagpr by @Songmu in https://github.com/Songmu/gitrail/pull/80
