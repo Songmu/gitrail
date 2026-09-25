@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.23](https://github.com/Songmu/gitrail/compare/v0.0.22...v0.0.23) - 2026-09-25
+
+- Bump github.com/Songmu/skillsmith from 0.1.0 to 0.2.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/89
+
 ## [v0.0.22](https://github.com/Songmu/gitrail/compare/v0.0.21...v0.0.22) - 2026-09-24
 
 - Generate notes for GitHub releases by @Songmu in https://github.com/Songmu/gitrail/pull/82
