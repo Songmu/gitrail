@@ -8,12 +8,7 @@ runs:
     - name: Install gitrail
       shell: bash
       run: |
-        version="v0.0.22"
-        bindir="${RUNNER_TEMP%/}/gitrail/bin"
-
-        sh "${GITHUB_ACTION_PATH}/install.sh" \
-          -b "${bindir}" "${version}"
-        echo "${bindir}" >> "${GITHUB_PATH}"
+        bash "${GITHUB_ACTION_PATH}/action.sh"
       env:
         # Authenticate gh attestation verify.
         GH_TOKEN: ${{ github.token }}
