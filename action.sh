@@ -2,7 +2,7 @@
 set -euo pipefail
 
 tool="gitrail"
-tag="v0.0.22"
+tag="v0.0.23"
 version="${tag#v}"
 
 case "${RUNNER_ARCH:?}" in
