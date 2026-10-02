@@ -5,24 +5,8 @@ tool="gitrail"
 tag="v0.0.23"
 version="${tag#v}"
 
-case "${RUNNER_ARCH:?}" in
-  X64)
-    cache_arch="x64"
-    ;;
-  ARM64)
-    cache_arch="arm64"
-    ;;
-  X86)
-    cache_arch="ia32"
-    ;;
-  ARM)
-    cache_arch="arm"
-    ;;
-  *)
-    echo "Unsupported runner architecture: ${RUNNER_ARCH}" >&2
-    exit 1
-    ;;
-esac
+# X86 needs conversion to ia32, but it's unsupported, so no issue.
+cache_arch=$(printf '%s' "${RUNNER_ARCH:?}" | tr '[:upper:]' '[:lower:]')
 
 # follow @actions/tool-cache convention
 tool_root="${RUNNER_TOOL_CACHE:?}/${tool}/${version}/${cache_arch}"
