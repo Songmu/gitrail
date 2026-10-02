@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.24](https://github.com/Songmu/gitrail/compare/v0.0.23...v0.0.24) - 2026-10-02
+
+- shorter action.sh by @Songmu in https://github.com/Songmu/gitrail/pull/92
+
 ## [v0.0.23](https://github.com/Songmu/gitrail/compare/v0.0.22...v0.0.23) - 2026-10-02
 
 - Bump github.com/Songmu/skillsmith from 0.1.0 to 0.2.0 by @dependabot[bot] in https://github.com/Songmu/gitrail/pull/89
