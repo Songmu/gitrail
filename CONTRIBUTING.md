@@ -8,7 +8,7 @@ Repository settings are managed with
 plan, and apply changes using the maintainer's local GitHub credentials:
 
 ```console
-% gh extension install babarot/gh-infra --pin v0.13.0
+% gh extension install babarot/gh-infra --pin v0.14.0
 % gh infra plan .github/infra.yaml
 % gh infra apply .github/infra.yaml
 ```
