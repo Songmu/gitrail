@@ -8,19 +8,119 @@ reconcile:
 spec:
   release_immutability: true
   rulesets:
-  - name: Restrict release version tag creation
+  - name: Protect release version tags
     target: tag
     enforcement: active
-    bypass_actors:
-    - app: github-actions
-      bypass_mode: always
     conditions:
       ref_name:
         include:
         - refs/tags/v*.*.*
     rules:
-      creation: true
+      non_fast_forward: false
+      update: true
+      deletion: true
+      creation: false
+      required_linear_history: false
+      required_signatures: false
+  - name: Protect floating major tag
+    target: tag
+    enforcement: active
+    conditions:
+      ref_name:
+        include:
+        - refs/tags/v0
+    rules:
+      non_fast_forward: false
+      update: false
+      deletion: true
+      creation: false
+      required_linear_history: false
+      required_signatures: false
+  - name: Protect main
+    target: branch
+    enforcement: active
+    conditions:
+      ref_name:
+        include:
+        - ~DEFAULT_BRANCH
+    rules:
+      pull_request:
+        required_approving_review_count: 0
+        dismiss_stale_reviews_on_push: false
+        require_code_owner_review: false
+        require_last_push_approval: false
+        required_review_thread_resolution: false
+      required_status_checks:
+        strict_required_status_checks_policy: false
+        contexts:
+        - context: test (ubuntu-latest)
+          app: github-actions
+        - context: test (macOS-latest)
+          app: github-actions
+        - context: test (windows-latest)
+          app: github-actions
+      non_fast_forward: true
+      update: false
+      deletion: true
+      creation: false
+      required_linear_history: false
+      required_signatures: false
   actions:
     enabled: true
     workflow_permissions: read
     can_approve_pull_requests: true
+    allowed_actions: all
+    fork_pr_approval: first_time_contributors
+  labels:
+  - name: bug
+    description: Something isn't working
+    color: d73a4a
+  - name: dependencies
+    description: Pull requests that update a dependency file
+    color: 0366d6
+  - name: documentation
+    description: Improvements or additions to documentation
+    color: 0075ca
+  - name: duplicate
+    description: This issue or pull request already exists
+    color: cfd3d7
+  - name: enhancement
+    description: New feature or request
+    color: a2eeef
+  - name: github_actions
+    description: Pull requests that update GitHub Actions code
+    color: "000000"
+  - name: go
+    description: Pull requests that update go code
+    color: 16e2e2
+  - name: good first issue
+    description: Good for newcomers
+    color: 7057ff
+  - name: help wanted
+    description: Extra attention is needed
+    color: 008672
+  - name: invalid
+    description: This doesn't seem right
+    color: e4e669
+  - name: question
+    description: Further information is requested
+    color: d876e3
+  - name: tagpr
+    color: ededed
+  - name: wontfix
+    description: This will not be worked on
+    color: ffffff
+  visibility: public
+  features:
+    issues: true
+    projects: true
+    pull_requests: true
+    wiki: true
+  merge_strategy:
+    allow_merge_commit: true
+    allow_rebase_merge: true
+    allow_squash_merge: true
+    merge_commit_message: PR_TITLE
+    merge_commit_title: MERGE_MESSAGE
+    squash_merge_commit_message: COMMIT_MESSAGES
+    squash_merge_commit_title: COMMIT_OR_PR_TITLE
