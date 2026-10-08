@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.25](https://github.com/Songmu/gitrail/compare/v0.0.24...v0.0.25) - 2026-10-08
+
+- Manage repository settings with gh-infra by @Songmu in https://github.com/Songmu/gitrail/pull/86
+
 ## [v0.0.24](https://github.com/Songmu/gitrail/compare/v0.0.23...v0.0.24) - 2026-10-02
 
 - shorter action.sh by @Songmu in https://github.com/Songmu/gitrail/pull/92
