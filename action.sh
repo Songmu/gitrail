@@ -2,7 +2,7 @@
 set -euo pipefail
 
 tool="gitrail"
-tag="v0.0.24"
+tag="v0.0.25"
 version="${tag#v}"
 
 # X86 needs conversion to ia32, but it's unsupported, so no issue.
