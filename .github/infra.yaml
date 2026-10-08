@@ -7,6 +7,10 @@ reconcile:
   rulesets: additive
 spec:
   release_immutability: true
+  security:
+    vulnerability_alerts: true
+    automated_security_fixes: true
+    private_vulnerability_reporting: true
   rulesets:
   - name: Protect release version tags
     target: tag
